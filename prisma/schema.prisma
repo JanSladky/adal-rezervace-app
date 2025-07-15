@@ -8,8 +8,25 @@ datasource db {
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   date        DateTime
   capacity    Int
+  image       String
+  location    String
+  description String
+  difficulty  Difficulty
+}
+
+enum Difficulty {
+  nenarocne
+  stredne_narocne
+  narocne
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  isAdmin  Boolean @default(false)
 }
