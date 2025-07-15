@@ -2,7 +2,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export default async function HomePage() {
-  const events = await prisma.event.findMany();
+  const events: {
+    id: number;
+    name: string;
+    date: Date;
+    capacity: number;
+  }[] = await prisma.event.findMany();
 
   return (
     <main className="p-4">
