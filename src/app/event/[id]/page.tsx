@@ -44,8 +44,9 @@ export default async function EventDetailPage({ params }: Props) {
       ) : (
         <ul className="flex flex-col gap-2">
           {event.eventDates.map((date: typeof event.eventDates[number]) => {
-            const occupied = date.registrations.length;
-            const occupancy = (occupied / date.capacity) * 100;
+            const totalRegistered = date.registrations.reduce((sum: number, reg: typeof date.registrations[number]) => sum + (reg.attendees || 1), 0);
+
+            const occupancy = (totalRegistered / date.capacity) * 100;
 
             return (
               <li key={date.id} className="border p-4 rounded">
@@ -54,7 +55,7 @@ export default async function EventDetailPage({ params }: Props) {
                   <div className="h-4 bg-green-500" style={{ width: `${Math.min(occupancy, 100)}%` }} />
                 </div>
                 <p className="text-sm mb-2">
-                  {occupied} / {date.capacity} přihlášeno
+                  {totalRegistered} / {date.capacity} přihlášeno
                 </p>
                 <Link href={`/event/${event.id}/register?dateId=${date.id}`} className="bg-blue-500 text-white px-4 py-2 rounded inline-block">
                   Registrovat se

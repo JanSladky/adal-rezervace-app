@@ -1,7 +1,17 @@
 "use client";
-import { useState } from "react";
 
-export default function RegistrationForm({ eventId, dates }: { eventId: number; dates: { id: number; date: string }[] }) {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function RegistrationForm({
+  eventId,
+  dates,
+}: {
+  eventId: number;
+  dates: { id: number; date: string }[];
+}) {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -19,7 +29,7 @@ export default function RegistrationForm({ eventId, dates }: { eventId: number; 
     });
 
     if (res.ok) {
-      alert("Registrace úspěšná!");
+      router.push(`/event/${eventId}`);
     } else {
       alert("Chyba při registraci.");
     }
@@ -45,17 +55,30 @@ export default function RegistrationForm({ eventId, dates }: { eventId: number; 
         type="number"
         min={1}
         value={form.attendees}
-        onChange={(e) => setForm({ ...form, attendees: parseInt(e.target.value) })}
+        onChange={(e) =>
+          setForm({ ...form, attendees: parseInt(e.target.value) })
+        }
         required
       />
-      <select value={form.eventDateId} onChange={(e) => setForm({ ...form, eventDateId: Number(e.target.value) })}>
+      <select
+        value={form.eventDateId}
+        onChange={(e) =>
+          setForm({ ...form, eventDateId: Number(e.target.value) })
+        }
+      >
         {dates.map((date) => (
           <option key={date.id} value={date.id}>
-            {new Date(date.date).toLocaleDateString("cs-CZ")}
+            {new Date(date.date).toLocaleString("cs-CZ", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
           </option>
         ))}
       </select>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
         Odeslat registraci
       </button>
     </form>
