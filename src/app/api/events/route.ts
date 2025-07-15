@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// POST = vytvoření nové akce
 export async function POST(request: Request) {
-  const { name, date, capacity, image, location, description, difficulty } = await request.json();
+  const { name, capacity, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber } = await request.json();
 
-  if (!name || !date || !capacity || !image || !location || !description || !difficulty) {
+  if (!name || !capacity || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -12,12 +13,14 @@ export async function POST(request: Request) {
     const event = await prisma.event.create({
       data: {
         name,
-        date: new Date(date),
         capacity: Number(capacity),
         image,
         location,
         description,
         difficulty,
+        amountCZK: Number(amountCZK),
+        variableSymbol,
+        accountNumber,
       },
     });
 
@@ -28,21 +31,31 @@ export async function POST(request: Request) {
   }
 }
 
+// GET = načtení všech akcí včetně termínů
 export async function GET() {
   try {
     const events = await prisma.event.findMany({
       select: {
         id: true,
         name: true,
-        date: true,
         capacity: true,
         image: true,
         location: true,
         description: true,
         difficulty: true,
+        amountCZK: true,
+        variableSymbol: true,
+        accountNumber: true,
+        eventDates: {
+          select: {
+            id: true,
+            date: true,
+            capacity: true,
+          },
+        },
       },
       orderBy: {
-        date: "asc",
+        id: "asc",
       },
     });
 

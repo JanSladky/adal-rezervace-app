@@ -10,6 +10,10 @@ export default function AddEventPage() {
     location: "",
     difficulty: "nenarocne",
     description: "",
+    capacity: "",
+    amountCZK: "",
+    variableSymbol: "",
+    accountNumber: "",
   });
   const [file, setFile] = useState<File | null>(null);
 
@@ -39,7 +43,17 @@ export default function AddEventPage() {
     const res = await fetch("/api/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, image: uploadData.url }),
+      body: JSON.stringify({
+        name: form.name,
+        location: form.location,
+        difficulty: form.difficulty,
+        description: form.description,
+        capacity: Number(form.capacity),
+        amountCZK: Number(form.amountCZK),
+        variableSymbol: form.variableSymbol,
+        accountNumber: form.accountNumber,
+        image: uploadData.url,
+      }),
     });
 
     if (res.ok) {
@@ -50,7 +64,7 @@ export default function AddEventPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl mx-auto p-4">
       <input
         type="text"
         placeholder="Název akce"
@@ -80,8 +94,42 @@ export default function AddEventPage() {
         onChange={(e) => setForm({ ...form, description: e.target.value })}
         required
       />
-      <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">Přidat akci</button>
+      <input
+        type="number"
+        placeholder="Kapacita"
+        value={form.capacity}
+        onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Cena za osobu (CZK)"
+        value={form.amountCZK}
+        onChange={(e) => setForm({ ...form, amountCZK: e.target.value })}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Variabilní symbol"
+        value={form.variableSymbol}
+        onChange={(e) => setForm({ ...form, variableSymbol: e.target.value })}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Číslo účtu"
+        value={form.accountNumber}
+        onChange={(e) => setForm({ ...form, accountNumber: e.target.value })}
+        required
+      />
+      <input
+        type="file"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        required
+      />
+      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        Přidat akci
+      </button>
     </form>
   );
 }

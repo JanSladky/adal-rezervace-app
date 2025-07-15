@@ -10,8 +10,8 @@ type Props = {
 };
 
 export default async function EditEventPage({ params }: Props) {
-  const cookieStore = await cookies();
-  const adminAuth = (await cookieStore).get("admin-auth")?.value;
+  const cookieStore = await cookies(); // Oprava: await
+  const adminAuth = cookieStore.get("admin-auth")?.value;
   const isAdmin = adminAuth === "true";
 
   if (!isAdmin) {
@@ -34,7 +34,6 @@ export default async function EditEventPage({ params }: Props) {
   const formattedEvent = {
     id: event.id,
     name: event.name,
-    date: event.date.toISOString().slice(0, 16),
     capacity: event.capacity,
     image: event.image,
     location: event.location,
@@ -51,7 +50,11 @@ export default async function EditEventPage({ params }: Props) {
       <h2 className="text-xl font-bold mt-8 mb-4">Termíny akce</h2>
       <ul className="flex flex-col gap-2 mb-4">
         {event.eventDates.map((date: typeof event.eventDates[number]) => {
-          const totalRegistered = date.registrations.reduce((sum: number, reg: typeof date.registrations[number]) => sum + (reg.attendees || 1), 0);
+          const totalRegistered = date.registrations.reduce(
+            (sum: number, reg: typeof date.registrations[number]) =>
+              sum + (reg.attendees || 1),
+            0
+          );
 
           const remainingCapacity = date.capacity - totalRegistered;
 
@@ -59,13 +62,17 @@ export default async function EditEventPage({ params }: Props) {
             <li key={date.id} className="border p-2 rounded flex flex-col gap-1">
               <div className="flex justify-between items-center">
                 <span>
-                  {new Date(date.date).toLocaleString("cs-CZ")} – Kapacita: {date.capacity} <br />
+                  {new Date(date.date).toLocaleString("cs-CZ")} – Kapacita: {date.capacity}
+                  <br />
                   Zbývá volných míst: {remainingCapacity}
                 </span>
 
                 <div className="flex gap-2">
                   <DeleteEventDateButton eventId={event.id} dateId={date.id} />
-                  <a href={`/admin/events/${event.id}/dates/${date.id}/edit`} className="bg-blue-500 text-white px-2 py-1 rounded text-sm">
+                  <a
+                    href={`/admin/events/${event.id}/dates/${date.id}/edit`}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                  >
                     Upravit
                   </a>
                 </div>

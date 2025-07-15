@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import DeleteButton from "../../../components/DeleteButton";
 
 export default async function AdminEventsPage() {
-  const cookieStore = await cookies(); // DŮLEŽITÉ: await před cookies()
+  const cookieStore = await cookies();
   const isAdmin = cookieStore.get("admin-auth")?.value === "true";
 
   if (!isAdmin) {
@@ -13,7 +13,19 @@ export default async function AdminEventsPage() {
   }
 
   const events = await prisma.event.findMany({
-    select: { id: true, name: true, date: true },
+    select: {
+      id: true,
+      name: true,
+      eventDates: {
+        select: {
+          id: true,
+          date: true,
+        },
+      },
+    },
+    orderBy: {
+      id: "asc",
+    },
   });
 
   return (
@@ -25,10 +37,20 @@ export default async function AdminEventsPage() {
       </Link>
 
       <ul className="flex flex-col gap-4">
-        {events.map((event) => (
+        {events.map((event: typeof events[number]) => (
           <li key={event.id} className="border p-4 rounded">
             <h2 className="font-bold">{event.name}</h2>
-            <p>{new Date(event.date).toLocaleString("cs-CZ")}</p>
+
+            {event.eventDates.length > 0 ? (
+              <ul>
+                {event.eventDates.map((date: typeof event.eventDates[number]) => (
+                  <li key={date.id}>{new Date(date.date).toLocaleString("cs-CZ")}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>Žádné termíny</p>
+            )}
+
             <div className="flex gap-2 mt-2">
               <Link href={`/admin/events/${event.id}/edit`} className="bg-blue-500 text-white px-3 py-1 rounded">
                 Upravit
