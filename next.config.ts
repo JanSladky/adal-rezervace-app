@@ -1,13 +1,16 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
     serverActions: true,
   },
-  runtime: "nodejs", // Ne "edge"
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

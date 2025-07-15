@@ -8,14 +8,13 @@ datasource db {
 }
 
 model Event {
-  id          Int         @id @default(autoincrement())
-  name        String
-  date        DateTime
-  capacity    Int
-  image       String
-  location    String
-  description String
-  difficulty  Difficulty
+  id            Int            @id @default(autoincrement())
+  name          String
+  image         String
+  location      String
+  description   String
+  difficulty    Difficulty
+  eventDates    EventDate[]
 }
 
 enum Difficulty {
@@ -29,4 +28,22 @@ model User {
   email    String @unique
   password String
   isAdmin  Boolean @default(false)
+}
+
+model EventDate {
+  id            Int            @id @default(autoincrement())
+  eventId       Int
+  date          DateTime
+  capacity      Int
+  event         Event          @relation(fields: [eventId], references: [id])
+  registrations Registration[]
+}
+
+model Registration {
+  id           Int        @id @default(autoincrement())
+  eventDateId  Int
+  name         String
+  email        String
+  attendees    Int?       // Nepovinné, defaultně 1 člověk pokud nezadá jinak
+  eventDate    EventDate  @relation(fields: [eventDateId], references: [id])
 }

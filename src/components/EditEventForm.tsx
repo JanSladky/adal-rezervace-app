@@ -6,8 +6,6 @@ type EditEventFormProps = {
   event: {
     id: number;
     name: string;
-    date: string;
-    capacity: number;
     location: string;
     description: string;
     difficulty: "nenarocne" | "stredne_narocne" | "narocne";
@@ -18,8 +16,6 @@ type EditEventFormProps = {
 export default function EditEventForm({ event }: EditEventFormProps) {
   const [form, setForm] = useState({
     name: event.name,
-    date: event.date,
-    capacity: event.capacity,
     location: event.location,
     description: event.description,
     difficulty: event.difficulty,
@@ -64,18 +60,6 @@ export default function EditEventForm({ event }: EditEventFormProps) {
         required
       />
       <input
-        type="datetime-local"
-        value={form.date}
-        onChange={(e) => setForm({ ...form, date: e.target.value })}
-        required
-      />
-      <input
-        type="number"
-        value={form.capacity}
-        onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value) })}
-        required
-      />
-      <input
         type="text"
         value={form.location}
         onChange={(e) => setForm({ ...form, location: e.target.value })}
@@ -83,7 +67,9 @@ export default function EditEventForm({ event }: EditEventFormProps) {
       />
       <select
         value={form.difficulty}
-        onChange={(e) => setForm({ ...form, difficulty: e.target.value as EditEventFormProps["event"]["difficulty"] })}
+        onChange={(e) =>
+          setForm({ ...form, difficulty: e.target.value as EditEventFormProps["event"]["difficulty"] })
+        }
         required
       >
         <option value="nenarocne">Nenáročné</option>
@@ -96,7 +82,9 @@ export default function EditEventForm({ event }: EditEventFormProps) {
         required
       />
       <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">Uložit změny</button>
+      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        Uložit změny
+      </button>
     </form>
   );
 }

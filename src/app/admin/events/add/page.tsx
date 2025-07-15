@@ -7,8 +7,6 @@ export default function AddEventPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
-    date: "",
-    capacity: 0,
     location: "",
     difficulty: "nenarocne",
     description: "",
@@ -58,18 +56,6 @@ export default function AddEventPage() {
         placeholder="Název akce"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-      />
-      <input
-        type="datetime-local"
-        value={form.date}
-        onChange={(e) => setForm({ ...form, date: e.target.value })}
-        required
-      />
-      <input
-        type="number"
-        value={form.capacity}
-        onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value) })}
         required
       />
       <input
