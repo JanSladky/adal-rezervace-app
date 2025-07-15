@@ -18,7 +18,7 @@ export default async function HomePage() {
             <div className="p-4 bg-white shadow rounded hover:bg-gray-50">
               <h2 className="text-xl font-semibold">{name}</h2>
               <p>{new Date(date).toLocaleDateString("cs-CZ")}</p>
-              <p>Kapacita: {capacity} osob</p>
+              <p className="">Kapacita: {capacity} osob</p>
             </div>
           </Link>
         ))}
