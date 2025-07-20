@@ -1,8 +1,11 @@
+// vynutí server–side vykreslení, aby params a cookies fungovaly správně
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import EditEventForm from "../../../../../components/EditEventForm";
 import AddEventDateForm from "../../../../../components/admin/AddEventDateForm";
-import { cookies } from "next/headers";
 import DeleteEventDateButton from "../../../../../components/admin/DeleteEventDateButton";
 
 type Props = {
@@ -10,35 +13,32 @@ type Props = {
 };
 
 export default async function EditEventPage({ params }: Props) {
-  const cookieStore = await cookies(); // Oprava: await
-  const adminAuth = cookieStore.get("admin-auth")?.value;
-  const isAdmin = adminAuth === "true";
-
-  if (!isAdmin) {
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
 
+  const eventId = Number(params.id);
+  if (isNaN(eventId)) return notFound();
+
   const event = await prisma.event.findUnique({
-    where: { id: Number(params.id) },
+    where: { id: eventId },
     include: {
       eventDates: {
-        include: {
-          registrations: true,
-        },
+        include: { registrations: true },
       },
     },
   });
-
   if (!event) return notFound();
 
   const formattedEvent = {
-    id: event.id,
-    name: event.name,
-    capacity: event.capacity,
-    image: event.image,
-    location: event.location,
+    id:          event.id,
+    name:        event.name,
+    capacity:    event.capacity,
+    image:       event.image,
+    location:    event.location,
     description: event.description,
-    difficulty: event.difficulty as "nenarocne" | "stredne_narocne" | "narocne",
+    difficulty:  event.difficulty as "nenarocne" | "stredne_narocne" | "narocne",
   } as const;
 
   return (
@@ -49,28 +49,31 @@ export default async function EditEventPage({ params }: Props) {
 
       <h2 className="text-xl font-bold mt-8 mb-4">Termíny akce</h2>
       <ul className="flex flex-col gap-2 mb-4">
-        {event.eventDates.map((date: typeof event.eventDates[number]) => {
-          const totalRegistered = date.registrations.reduce(
-            (sum: number, reg: typeof date.registrations[number]) =>
-              sum + (reg.attendees || 1),
+        {event.eventDates.map((dateItem: any) => {
+          // sum explicitně number, reg jako any
+          const totalRegistered = dateItem.registrations.reduce(
+            (sum: number, reg: any) => sum + (reg.attendees || 1),
             0
           );
-
-          const remainingCapacity = date.capacity - totalRegistered;
+          const remainingCapacity = dateItem.capacity - totalRegistered;
 
           return (
-            <li key={date.id} className="border p-2 rounded flex flex-col gap-1">
+            <li key={dateItem.id} className="border p-2 rounded flex flex-col gap-1">
               <div className="flex justify-between items-center">
                 <span>
-                  {new Date(date.date).toLocaleString("cs-CZ")} – Kapacita: {date.capacity}
+                  {new Date(dateItem.date).toLocaleString("cs-CZ")} – Kapacita:{" "}
+                  {dateItem.capacity}
                   <br />
                   Zbývá volných míst: {remainingCapacity}
                 </span>
 
                 <div className="flex gap-2">
-                  <DeleteEventDateButton eventId={event.id} dateId={date.id} />
+                  <DeleteEventDateButton
+                    eventId={event.id}
+                    dateId={dateItem.id}
+                  />
                   <a
-                    href={`/admin/events/${event.id}/dates/${date.id}/edit`}
+                    href={`/admin/events/${event.id}/dates/${dateItem.id}/edit`}
                     className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
                   >
                     Upravit
@@ -79,9 +82,9 @@ export default async function EditEventPage({ params }: Props) {
               </div>
 
               <h3 className="font-semibold mt-2">Registrovaní:</h3>
-              {date.registrations.length > 0 ? (
+              {dateItem.registrations.length > 0 ? (
                 <ul className="text-sm mt-1">
-                  {date.registrations.map((reg: typeof date.registrations[number]) => (
+                  {dateItem.registrations.map((reg: any) => (
                     <li key={reg.id}>
                       {reg.name} ({reg.email}) – {reg.attendees || 1} osob
                     </li>

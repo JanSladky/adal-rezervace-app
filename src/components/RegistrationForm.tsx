@@ -3,20 +3,23 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type RegistrationFormProps = {
+  eventId: number;
+  selectedDateId: number;
+  selectedDateISO: string;
+};
+
 export default function RegistrationForm({
   eventId,
-  dates,
-}: {
-  eventId: number;
-  dates: { id: number; date: string }[];
-}) {
+  selectedDateId,
+  selectedDateISO,
+}: RegistrationFormProps) {
   const router = useRouter();
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     attendees: 1,
-    eventDateId: dates[0]?.id || 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +28,11 @@ export default function RegistrationForm({
     const res = await fetch("/api/registrations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, eventId }),
+      body: JSON.stringify({
+        ...form,
+        eventId,
+        eventDateId: selectedDateId,
+      }),
     });
 
     if (res.ok) {
@@ -37,6 +44,14 @@ export default function RegistrationForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+      <p>
+        Termín:{" "}
+        {new Date(selectedDateISO).toLocaleString("cs-CZ", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}
+      </p>
+
       <input
         type="text"
         placeholder="Vaše jméno"
@@ -54,27 +69,13 @@ export default function RegistrationForm({
       <input
         type="number"
         min={1}
+        placeholder="Počet osob"
         value={form.attendees}
         onChange={(e) =>
-          setForm({ ...form, attendees: parseInt(e.target.value) })
+          setForm({ ...form, attendees: Number(e.target.value) })
         }
         required
       />
-      <select
-        value={form.eventDateId}
-        onChange={(e) =>
-          setForm({ ...form, eventDateId: Number(e.target.value) })
-        }
-      >
-        {dates.map((date) => (
-          <option key={date.id} value={date.id}>
-            {new Date(date.date).toLocaleString("cs-CZ", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </option>
-        ))}
-      </select>
       <button
         type="submit"
         className="bg-blue-500 text-white px-4 py-2 rounded"

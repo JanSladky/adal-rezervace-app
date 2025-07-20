@@ -31,6 +31,27 @@ export async function PUT(request: Request, { params }: Context) {
     return NextResponse.json({ error: "Chyba při aktualizaci." }, { status: 500 });
   }
 }
+export async function GET(_request: Request, { params }: Context) {
+  const id = Number(params.id);
+
+  try {
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: {
+        eventDates: true,
+      },
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(event);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Chyba při načítání." }, { status: 500 });
+  }
+}
 
 export async function DELETE(_request: Request, { params }: Context) {
   const id = Number(params.id);

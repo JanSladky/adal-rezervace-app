@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 
 // POST = vytvoření nové akce
 export async function POST(request: Request) {
-  const { name, capacity, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber } = await request.json();
+  const { name, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber } = await request.json();
 
-  if (!name || !capacity || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber) {
+  if (!name || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -13,7 +13,6 @@ export async function POST(request: Request) {
     const event = await prisma.event.create({
       data: {
         name,
-        capacity: Number(capacity),
         image,
         location,
         description,
@@ -38,7 +37,6 @@ export async function GET() {
       select: {
         id: true,
         name: true,
-        capacity: true,
         image: true,
         location: true,
         description: true,

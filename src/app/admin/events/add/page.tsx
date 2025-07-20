@@ -10,7 +10,6 @@ export default function AddEventPage() {
     location: "",
     difficulty: "nenarocne",
     description: "",
-    capacity: "",
     amountCZK: "",
     variableSymbol: "",
     accountNumber: "",
@@ -48,7 +47,6 @@ export default function AddEventPage() {
         location: form.location,
         difficulty: form.difficulty,
         description: form.description,
-        capacity: Number(form.capacity),
         amountCZK: Number(form.amountCZK),
         variableSymbol: form.variableSymbol,
         accountNumber: form.accountNumber,
@@ -65,42 +63,15 @@ export default function AddEventPage() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl mx-auto p-4">
-      <input
-        type="text"
-        placeholder="Název akce"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Místo konání"
-        value={form.location}
-        onChange={(e) => setForm({ ...form, location: e.target.value })}
-        required
-      />
-      <select
-        value={form.difficulty}
-        onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
-        required
-      >
+      <input type="text" placeholder="Název akce" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+      <input type="text" placeholder="Místo konání" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} required />
+      <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} required>
         <option value="nenarocne">Nenáročné</option>
         <option value="stredne_narocne">Středně náročné</option>
         <option value="narocne">Náročné</option>
       </select>
-      <textarea
-        placeholder="Popis"
-        value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Kapacita"
-        value={form.capacity}
-        onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-        required
-      />
+      <textarea placeholder="Popis" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+
       <input
         type="number"
         placeholder="Cena za osobu (CZK)"
@@ -115,18 +86,8 @@ export default function AddEventPage() {
         onChange={(e) => setForm({ ...form, variableSymbol: e.target.value })}
         required
       />
-      <input
-        type="text"
-        placeholder="Číslo účtu"
-        value={form.accountNumber}
-        onChange={(e) => setForm({ ...form, accountNumber: e.target.value })}
-        required
-      />
-      <input
-        type="file"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        required
-      />
+      <input type="text" placeholder="Číslo účtu" value={form.accountNumber} onChange={(e) => setForm({ ...form, accountNumber: e.target.value })} required />
+      <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
       <button type="submit" className="bg-blue-500 text-white p-2 rounded">
         Přidat akci
       </button>
