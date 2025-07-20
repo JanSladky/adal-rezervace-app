@@ -31,6 +31,7 @@ model Registration {
   name         String     @default("Neuvedeno")                // Výchozí hodnota
   email        String     @default("neuvedeno@priklad.cz")     // Výchozí hodnota
   attendees    Int?       @default(1)                          // Nepovinné
+  paid         Boolean    @default(false)
 }
 
 model EventDate {

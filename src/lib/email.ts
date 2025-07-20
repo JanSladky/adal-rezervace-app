@@ -1,3 +1,4 @@
+// src/lib/email.ts
 import nodemailer from "nodemailer";
 
 export const transporter = nodemailer.createTransport({
@@ -10,14 +11,16 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-// Typy můžete upravit podle toho, co posíláte:
-type RegistrationData = {
+// ================================
+// 1) Odeslání e-mailu po registraci
+// ================================
+export type RegistrationData = {
   userName: string;
   userEmail: string;
   attendees: number;
   eventName: string;
   eventLocation: string;
-  eventDate: string; // ISO nebo už formátovaný string
+  eventDate: string; // ISO string nebo již formátovaný
   adminEmail: string;
   variableSymbol: string;
   amountCZK: number;
@@ -25,7 +28,7 @@ type RegistrationData = {
 };
 
 export async function sendRegistrationEmails(data: RegistrationData) {
-  // Pro uživatele:
+  // E-mail uživateli
   await transporter.sendMail({
     from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
     to: data.userEmail,
@@ -42,7 +45,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
     `,
   });
 
-  // Pro administrátora:
+  // E-mail administrátorovi
   await transporter.sendMail({
     from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
     to: data.adminEmail,
@@ -50,13 +53,54 @@ export async function sendRegistrationEmails(data: RegistrationData) {
     text: `
 Dobrý den,
 
-Na akci ${data.eventName}, termín ${data.eventDate}, se právě registroval nový účastník:
+Na akci ${data.eventName} (${data.eventDate}) se právě registroval nový účastník:
 
 Jméno: ${data.userName}
 E-mail: ${data.userEmail}
 Počet osob: ${data.attendees}
 
 Přihlášeno přes systém.
+    `,
+  });
+}
+
+// ================================================
+// 2) Odeslání e-mailu po potvrzení platby registrace
+// ================================================
+export interface PaymentConfirmationData {
+  registrationId: number;
+  userName: string;
+  userEmail: string;
+  eventName: string;
+  eventLocation: string;
+  eventDate: string; // ISO string
+}
+
+export async function sendPaymentConfirmationEmail({ registrationId, userName, userEmail, eventName, eventLocation, eventDate }: PaymentConfirmationData) {
+  // E-mail uživateli
+  await transporter.sendMail({
+    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    to: userEmail,
+    subject: `Potvrzení platby – ${eventName}`,
+    html: `
+      <p>Dobrý den ${userName},</p>
+      <p>vaše platba za registraci č. <strong>${registrationId}</strong> na akci <strong>${eventName}</strong> (${new Date(eventDate).toLocaleString(
+      "cs-CZ"
+    )}) byla úspěšně přijata.</p>
+      <p>Těšíme se na vás na místě konání: ${eventLocation}.</p>
+    `,
+  });
+
+  // (Volitelně) notifikace administrátorovi
+  await transporter.sendMail({
+    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `Platba přijata – registrace ${registrationId}`,
+    text: `
+Administrátor,
+
+byla přijata platba za registraci č. ${registrationId}
+Akce: ${eventName} (${new Date(eventDate).toLocaleString("cs-CZ")})
     `,
   });
 }
