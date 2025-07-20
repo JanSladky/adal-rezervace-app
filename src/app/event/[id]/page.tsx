@@ -1,70 +1,84 @@
+// src/app/event/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 
 type Props = {
   params: { id: string };
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function EventDetailPage({ params }: Props) {
-  const id = Number(params.id);
+  const eventId = Number(params.id);
+  if (isNaN(eventId)) return notFound();
 
   const event = await prisma.event.findUnique({
-    where: { id },
+    where: { id: eventId },
     include: {
       eventDates: {
         include: { registrations: true },
       },
     },
   });
-
   if (!event) return notFound();
 
-  const difficultyMap: Record<"nenarocne" | "stredne_narocne" | "narocne", string> = {
-    nenarocne: "Nenáročné",
-    stredne_narocne: "Středně náročné",
-    narocne: "Náročné",
-  };
-
   return (
-    <main className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">{event.name}</h1>
+    <div className="p-4 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">{event.name}</h1>
+      <p className="mb-8">{event.description}</p>
 
-      {event.image?.trim() !== "" && <Image src={event.image} alt={event.name} width={800} height={500} className="w-full h-auto rounded mb-4" />}
+      <h2 className="text-2xl font-semibold mb-4">Dostupné termíny</h2>
+      <ul className="space-y-4">
+        {event.eventDates.map((date: any) => {
+          // spočítáme, kolik je registrováno
+          const totalRegistered = date.registrations.reduce(
+            (sum: number, r: any) => sum + (r.attendees ?? 1),
+            0
+          );
+          const remaining = date.capacity - totalRegistered;
+          const pct = Math.min(100, Math.round((totalRegistered / date.capacity) * 100));
 
-      <p className="mb-2">Místo konání: {event.location}</p>
-      <p className="mb-2">Náročnost: {difficultyMap[event.difficulty as keyof typeof difficultyMap]}</p>
-      <p className="mb-4 whitespace-pre-line">{event.description}</p>
+          return (
+            <li key={date.id} className="border rounded-lg p-4">
+              {/* Datum */}
+              <div className="mb-2 font-medium">
+                {new Date(date.date).toLocaleString("cs-CZ", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </div>
 
-      <h2 className="text-xl font-bold mb-2">Dostupné termíny</h2>
+              {/* Progres bar */}
+              <div className="w-full bg-gray-200 h-2 rounded mb-2">
+                <div
+                  className="h-2 rounded bg-green-500"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
 
-      {event.eventDates.length === 0 ? (
-        <p>Žádné termíny zatím nejsou vypsané.</p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {event.eventDates.map((date: typeof event.eventDates[number]) => {
-            const totalRegistered = date.registrations.reduce((sum: number, reg: typeof date.registrations[number]) => sum + (reg.attendees || 1), 0);
+              {/* Stav */}
+              <div className="mb-4 text-sm text-gray-700">
+                {totalRegistered} / {date.capacity} přihlášeno
+              </div>
 
-            const occupancy = (totalRegistered / date.capacity) * 100;
-
-            return (
-              <li key={date.id} className="border p-4 rounded">
-                <p>{new Date(date.date).toLocaleString("cs-CZ")}</p>
-                <div className="h-4 bg-gray-200 rounded overflow-hidden my-2">
-                  <div className="h-4 bg-green-500" style={{ width: `${Math.min(occupancy, 100)}%` }} />
-                </div>
-                <p className="text-sm mb-2">
-                  {totalRegistered} / {date.capacity} přihlášeno
-                </p>
-                <Link href={`/event/${event.id}/register?dateId=${date.id}`} className="bg-blue-500 text-white px-4 py-2 rounded inline-block">
+              {/* Tlačítko / vyprodáno */}
+              {remaining > 0 ? (
+                <Link
+                  href={`/event/${eventId}/register?dateId=${date.id}`}
+                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                >
                   Registrovat se
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </main>
+              ) : (
+                <span className="text-red-600 font-semibold">
+                  Kapacita vyčerpána
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
