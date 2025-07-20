@@ -3,9 +3,16 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendPaymentConfirmationEmail } from "@/lib/email";
 
+type Context = {
+  params: { id: string };
+};
+
+/**
+ * Označí registraci jako zaplacenou a pošle potvrzovací e-mail.
+ */
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: Context
 ) {
   const regId = Number(params.id);
   if (isNaN(regId)) {
@@ -16,7 +23,6 @@ export async function PATCH(
   }
 
   try {
-    // 1) Označíme platbu
     const registration = await prisma.registration.update({
       where: { id: regId },
       data: { paid: true },
@@ -26,15 +32,20 @@ export async function PATCH(
       },
     });
 
-    // 2) Pošleme potvrzení e-mailem
-    //    Ujistěte se, že máte v .env nastavené ADMIN_EMAIL
+    if (!registration) {
+      return NextResponse.json(
+        { error: "Registrace nebyla nalezena." },
+        { status: 404 }
+      );
+    }
+
     await sendPaymentConfirmationEmail({
       registrationId: registration.id,
-      userName:        registration.name,
-      userEmail:       registration.email,
-      eventName:       registration.event.name,
-      eventLocation:   registration.event.location,
-      eventDate:       registration.eventDate.date.toISOString(),
+      userName: registration.name,
+      userEmail: registration.email,
+      eventName: registration.event.name,
+      eventLocation: registration.event.location,
+      eventDate: registration.eventDate.date.toISOString(),
     });
 
     return NextResponse.json({ message: "Označeno jako zaplaceno." });
@@ -47,9 +58,12 @@ export async function PATCH(
   }
 }
 
+/**
+ * Smaže registraci (uvolní tak kapacitu).
+ */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: Context
 ) {
   const regId = Number(params.id);
   if (isNaN(regId)) {
@@ -62,7 +76,14 @@ export async function DELETE(
   try {
     await prisma.registration.delete({ where: { id: regId } });
     return NextResponse.json({ message: "Registrace smazána." });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === "P2025") {
+      // Záznam neexistuje
+      return NextResponse.json(
+        { error: "Registrace k smazání nebyla nalezena." },
+        { status: 404 }
+      );
+    }
     console.error("Chyba při mazání registrace:", err);
     return NextResponse.json(
       { error: "Chyba při mazání registrace." },
