@@ -28,7 +28,6 @@
     "@eslint/js": "^9.31.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/bcrypt": "^5.0.2",
-    "@types/next": "^8.0.7",
     "@types/node": "^20.19.9",
     "@types/nodemailer": "^6.4.17",
     "@types/qr-image": "^3.2.9",

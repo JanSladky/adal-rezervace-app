@@ -1,4 +1,3 @@
-// src/app/admin/events/[id]/dates/[dateId]/edit/page.tsx
 export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
@@ -6,13 +5,6 @@ import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import EditEventDateForm from "@/components/admin/EditEventDateForm";
 import RegistrationActions from "@/components/admin/RegistrationActions";
-
-type PageProps = {
-  params: {
-    id: string;
-    dateId: string;
-  };
-};
 
 type RegistrationRecord = {
   id: number;
@@ -22,26 +14,27 @@ type RegistrationRecord = {
   paid: boolean;
 };
 
-export default async function Page({ params }: PageProps) {
-  const cookieStore = await cookies(); // ✅ bez await!
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string; dateId: string }>;
+}) {
+  const { id, dateId } = await params;
+
+  const cookieStore = await cookies();
   if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
 
-  const eventId = Number(params.id);
-  const dateId = Number(params.dateId);
-  if (isNaN(eventId) || isNaN(dateId)) {
-    return notFound();
-  }
+  const eventId = Number(id);
+  const dId = Number(dateId);
+  if (isNaN(eventId) || isNaN(dId)) return notFound();
 
   const raw = await prisma.eventDate.findUnique({
-    where: { id: dateId },
+    where: { id: dId },
     include: { registrations: true },
   });
-
-  if (!raw || raw.eventId !== eventId) {
-    return notFound();
-  }
+  if (!raw || raw.eventId !== eventId) return notFound();
 
   const dateItem = {
     id: raw.id,
@@ -52,7 +45,7 @@ export default async function Page({ params }: PageProps) {
 
   const totalRegistered = dateItem.registrations.reduce(
     (sum, r) => sum + (r.attendees ?? 1),
-    0
+    0,
   );
   const remaining = dateItem.capacity - totalRegistered;
 

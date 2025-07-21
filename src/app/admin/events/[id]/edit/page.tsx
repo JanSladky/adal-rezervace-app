@@ -1,4 +1,3 @@
-// src/app/admin/events/[id]/edit/page.tsx
 export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
@@ -10,23 +9,16 @@ import AddEventDateForm from "@/components/admin/AddEventDateForm";
 import DeleteEventDateButton from "@/components/admin/DeleteEventDateButton";
 import RegistrationActions from "@/components/admin/RegistrationActions";
 
-type Props = { params: { id: string; dateId: string } };
-
-export default async function EditEventDatePage({ params }: Props) {
-  const { id, dateId } = params;
-  // 1) Ověření admina – tentokrát opravdu awaitujeme cookies()
-  const cookieStore = await cookies();
-  if ((await cookieStore).get("admin-auth")?.value !== "true") {
+export default async function Page({ params }: { params: { id: string } }) {
+  const cookieStore = cookies() as any;
+  if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
 
-  // 2) Parsování a validace eventId
+  // ✅ async/await můžeš použít, protože funkce Page je async
   const eventId = Number(params.id);
-  if (isNaN(eventId)) {
-    return notFound();
-  }
+  if (isNaN(eventId)) return notFound();
 
-  // 3) Načíst akci s termíny a registracemi
   const event = await prisma.event.findUnique({
     where: { id: eventId },
     include: {
@@ -35,15 +27,11 @@ export default async function EditEventDatePage({ params }: Props) {
       },
     },
   });
-  if (!event) {
-    return notFound();
-  }
+  if (!event) return notFound();
 
-  // 4) Pomocné typy pro bezpečné TS mapování
   type DateItem = typeof event.eventDates[number];
   type Reg = DateItem["registrations"][number];
 
-  // 5) Data pro EditEventForm (kapacita se mění až u termínů)
   const formattedEvent = {
     id: event.id,
     name: event.name,
@@ -57,13 +45,11 @@ export default async function EditEventDatePage({ params }: Props) {
     <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Upravit akci</h1>
       <EditEventForm event={formattedEvent} />
-
       <h2 className="text-xl font-bold mt-8 mb-4">Termíny akce</h2>
       <ul className="flex flex-col gap-6 mb-4">
         {event.eventDates.map((dateItem: DateItem) => {
           const totalRegistered = dateItem.registrations.reduce((sum: number, r: Reg) => sum + (r.attendees ?? 1), 0);
           const remaining = dateItem.capacity - totalRegistered;
-
           const unpaid = dateItem.registrations.filter((r: Reg) => !r.paid);
           const paid = dateItem.registrations.filter((r: Reg) => r.paid);
 
@@ -90,7 +76,6 @@ export default async function EditEventDatePage({ params }: Props) {
                 </div>
               </div>
 
-              {/* Nezaplacené rezervace */}
               <section>
                 <h3 className="font-semibold">Nezaplacené rezervace</h3>
                 {unpaid.length > 0 ? (
@@ -118,7 +103,6 @@ export default async function EditEventDatePage({ params }: Props) {
                 )}
               </section>
 
-              {/* Zaplacené rezervace */}
               <section className="mt-4">
                 <h3 className="font-semibold">Zaplacené rezervace</h3>
                 {paid.length > 0 ? (
@@ -149,7 +133,6 @@ export default async function EditEventDatePage({ params }: Props) {
           );
         })}
       </ul>
-
       <AddEventDateForm eventId={event.id} />
     </div>
   );
