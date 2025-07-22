@@ -1,15 +1,14 @@
-// src/app/event/[id]/page.tsx
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-type Props = {
+export default async function EventDetailPage({
+  params,
+}: {
   params: { id: string };
-};
-
-export const dynamic = "force-dynamic";
-
-export default async function EventDetailPage({ params }: Props) {
+}) {
   const eventId = Number(params.id);
   if (isNaN(eventId)) return notFound();
 
@@ -31,7 +30,6 @@ export default async function EventDetailPage({ params }: Props) {
       <h2 className="text-2xl font-semibold mb-4">Dostupné termíny</h2>
       <ul className="space-y-4">
         {event.eventDates.map((date: any) => {
-          // spočítáme, kolik je registrováno
           const totalRegistered = date.registrations.reduce(
             (sum: number, r: any) => sum + (r.attendees ?? 1),
             0
@@ -41,28 +39,21 @@ export default async function EventDetailPage({ params }: Props) {
 
           return (
             <li key={date.id} className="border rounded-lg p-4">
-              {/* Datum */}
               <div className="mb-2 font-medium">
                 {new Date(date.date).toLocaleString("cs-CZ", {
                   dateStyle: "medium",
                   timeStyle: "short",
                 })}
               </div>
-
-              {/* Progres bar */}
               <div className="w-full bg-gray-200 h-2 rounded mb-2">
                 <div
                   className="h-2 rounded bg-green-500"
                   style={{ width: `${pct}%` }}
                 />
               </div>
-
-              {/* Stav */}
               <div className="mb-4 text-sm text-gray-700">
                 {totalRegistered} / {date.capacity} přihlášeno
               </div>
-
-              {/* Tlačítko / vyprodáno */}
               {remaining > 0 ? (
                 <Link
                   href={`/event/${eventId}/register?dateId=${date.id}`}

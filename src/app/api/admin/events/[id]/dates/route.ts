@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-type Props = { params: { id: string } };
-
-export async function POST(request: Request, { params }: Props) {
+export async function POST(
+  request: Request,
+  context: { params: { id: string } }
+) {
   const { date, capacity } = await request.json();
 
   if (!date || !capacity) {
@@ -13,7 +14,7 @@ export async function POST(request: Request, { params }: Props) {
   try {
     const newDate = await prisma.eventDate.create({
       data: {
-        eventId: Number(params.id),
+        eventId: Number(context.params.id),
         date: new Date(date),
         capacity: Number(capacity),
       },

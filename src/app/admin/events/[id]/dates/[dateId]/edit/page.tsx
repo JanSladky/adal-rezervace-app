@@ -17,9 +17,9 @@ type RegistrationRecord = {
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string; dateId: string }>;
+  params: { id: string; dateId: string };
 }) {
-  const { id, dateId } = await params;
+  const { id, dateId } = params;
 
   const cookieStore = await cookies();
   if (cookieStore.get("admin-auth")?.value !== "true") {
