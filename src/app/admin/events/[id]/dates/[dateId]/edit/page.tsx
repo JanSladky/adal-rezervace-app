@@ -14,14 +14,10 @@ type RegistrationRecord = {
   paid: boolean;
 };
 
-export default async function Page({
-  params,
-}: {
-  params: { id: string; dateId: string };
-}) {
+export default async function Page({ params }: { params: { id: string; dateId: string } }) {
   const { id, dateId } = params;
 
-  const cookieStore = await cookies();
+  const cookieStore = cookies() as any;
   if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
@@ -43,22 +39,14 @@ export default async function Page({
     registrations: raw.registrations as RegistrationRecord[],
   };
 
-  const totalRegistered = dateItem.registrations.reduce(
-    (sum, r) => sum + (r.attendees ?? 1),
-    0,
-  );
+  const totalRegistered = dateItem.registrations.reduce((sum, r) => sum + (r.attendees ?? 1), 0);
   const remaining = dateItem.capacity - totalRegistered;
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Upravit termín akce</h1>
 
-      <EditEventDateForm
-        eventId={eventId}
-        dateId={dateItem.id}
-        initialDate={dateItem.date.toISOString()}
-        initialCapacity={dateItem.capacity}
-      />
+      <EditEventDateForm eventId={eventId} dateId={dateItem.id} initialDate={dateItem.date.toISOString()} initialCapacity={dateItem.capacity} />
 
       <p className="mt-6">
         Kapacita: {dateItem.capacity} &nbsp;|&nbsp; Zbývá volných míst: {remaining}
@@ -70,8 +58,7 @@ export default async function Page({
           {dateItem.registrations.map((r) => (
             <li key={r.id} className="flex justify-between items-center">
               <span>
-                {r.name} ({r.email}) – {r.attendees ?? 1} osob{" "}
-                {r.paid && <strong>(✅ zaplaceno)</strong>}
+                {r.name} ({r.email}) – {r.attendees ?? 1} osob {r.paid && <strong>(✅ zaplaceno)</strong>}
               </span>
               <RegistrationActions
                 registration={{
