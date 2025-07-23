@@ -27,6 +27,8 @@ export default function EditEventForm({ event }: EditEventFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    console.log("📦 Vybraný soubor:", file);
+
     let imageUrl = event.image;
 
     if (file) {
@@ -40,11 +42,13 @@ export default function EditEventForm({ event }: EditEventFormProps) {
         });
 
         const uploadData = await uploadRes.json();
-        if (uploadData.secure_url) {
-          imageUrl = uploadData.secure_url;
-          console.log("🖼️ Upload OK:", imageUrl);
+        console.log("📥 Odpověď z /api/upload:", uploadData);
+
+        if (uploadData.secure_url || uploadData.url) {
+          imageUrl = uploadData.secure_url || uploadData.url;
+          console.log("🖼️ Upload OK, URL:", imageUrl);
         } else {
-          console.warn("⚠️ Upload failed", uploadData);
+          console.warn("⚠️ Upload failed – žádná image URL!", uploadData);
         }
       } catch (err) {
         console.error("❌ Upload error:", err);
@@ -57,7 +61,7 @@ export default function EditEventForm({ event }: EditEventFormProps) {
       image: imageUrl,
     };
 
-    console.log("📤 Odesílám data:", payload);
+    console.log("📤 Odesílám data na PUT /api/events/[id]:", payload);
 
     try {
       const res = await fetch(`/api/events/${event.id}`, {
@@ -87,8 +91,7 @@ export default function EditEventForm({ event }: EditEventFormProps) {
         type="text"
         value={form.duration}
         onChange={(e) => setForm({ ...form, duration: e.target.value })}
-        placeholder="Délka trvání (v minutách)"
-        min={1}
+        placeholder="Délka trvání (např. 35–45)"
         required
       />
       <select

@@ -24,8 +24,10 @@ export async function POST(request: Request) {
       (error, result) => {
         if (error) {
           reject(error);
-        } else if (result) {
-          resolve(result as { secure_url: string });
+        } else if (result?.secure_url) {
+          resolve({ secure_url: result.secure_url });
+        } else {
+          reject(new Error("No secure_url in result"));
         }
       }
     );
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await uploadPromise;
-    return NextResponse.json({ url: result.secure_url });
+    return NextResponse.json({ secure_url: result.secure_url }); // ✅ správný klíč
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
