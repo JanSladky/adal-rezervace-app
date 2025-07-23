@@ -4,17 +4,28 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import RegistrationForm from "@/components/RegistrationForm";
 
-export default async function RegisterPage({
-  params,
-  searchParams,
-}: {
+type PageProps = {
   params: { id: string };
-  searchParams?: { dateId?: string };
-}) {
-  const eventId = Number(params.id);
-  const dateId = Number(searchParams?.dateId);
+  searchParams: { dateId?: string };
+};
+
+type Registration = {
+  attendees: number | null;
+};
+
+type EventDate = {
+  id: number;
+  date: Date;
+  capacity: number;
+  registrations: Registration[];
+};
+
+export default async function RegisterPage({ params, searchParams }: PageProps) {
+  const eventId = parseInt(params.id);
+  const dateId = parseInt(searchParams.dateId ?? "");
+
   if (isNaN(eventId) || isNaN(dateId)) {
-    notFound();
+    return notFound();
   }
 
   const event = await prisma.event.findUnique({
@@ -25,16 +36,14 @@ export default async function RegisterPage({
       },
     },
   });
-  if (!event) notFound();
 
-  const date = event.eventDates.find(
-    (d: (typeof event.eventDates)[number]) => d.id === dateId
-  );
-  if (!date) notFound();
+  if (!event) return notFound();
 
-  const already = date.registrations.reduce(
-    (sum: number, r: (typeof date.registrations)[number]) =>
-      sum + (r.attendees ?? 1),
+  const date = event.eventDates.find((d: EventDate) => d.id === dateId);
+  if (!date) return notFound();
+
+  const alreadyRegistered = date.registrations.reduce(
+    (sum: number, r: Registration) => sum + (r.attendees ?? 1),
     0
   );
 
@@ -48,7 +57,7 @@ export default async function RegisterPage({
         selectedDateId={dateId}
         selectedDateISO={date.date.toISOString()}
         capacity={date.capacity}
-        alreadyRegistered={already}
+        alreadyRegistered={alreadyRegistered}
       />
     </div>
   );
