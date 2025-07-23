@@ -10,7 +10,7 @@ import DeleteEventDateButton from "@/components/admin/DeleteEventDateButton";
 import RegistrationActions from "@/components/admin/RegistrationActions";
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const cookieStore = cookies() as any;
+  const cookieStore = await cookies();
   if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
@@ -93,7 +93,6 @@ export default async function Page({ params }: { params: { id: string } }) {
                             attendees: r.attendees ?? 1,
                             paid: r.paid,
                           }}
-                          eventId={event.id}
                         />
                       </li>
                     ))}
@@ -120,7 +119,6 @@ export default async function Page({ params }: { params: { id: string } }) {
                             attendees: r.attendees ?? 1,
                             paid: r.paid,
                           }}
-                          eventId={event.id}
                         />
                       </li>
                     ))}

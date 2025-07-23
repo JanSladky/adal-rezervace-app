@@ -4,6 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+// Definuj přesně typ pro termín a registrace
+type Registration = {
+  id: number;
+  attendees: number | null;
+};
+
+type EventDate = {
+  id: number;
+  date: string | Date;
+  capacity: number;
+  registrations: Registration[];
+};
+
 export default async function EventDetailPage({
   params,
 }: {
@@ -29,13 +42,16 @@ export default async function EventDetailPage({
 
       <h2 className="text-2xl font-semibold mb-4">Dostupné termíny</h2>
       <ul className="space-y-4">
-        {event.eventDates.map((date: any) => {
+        {event.eventDates.map((date: EventDate) => {
           const totalRegistered = date.registrations.reduce(
-            (sum: number, r: any) => sum + (r.attendees ?? 1),
+            (sum: number, r: Registration) => sum + (r.attendees ?? 1),
             0
           );
           const remaining = date.capacity - totalRegistered;
-          const pct = Math.min(100, Math.round((totalRegistered / date.capacity) * 100));
+          const pct = Math.min(
+            100,
+            Math.round((totalRegistered / date.capacity) * 100)
+          );
 
           return (
             <li key={date.id} className="border rounded-lg p-4">

@@ -20,7 +20,6 @@ export async function PUT(request: Request, { params }: Context) {
       where: { id },
       data: {
         name,
-        capacity: Number(capacity),
         image,
         location,
         description,

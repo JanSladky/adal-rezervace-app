@@ -6,18 +6,19 @@ import { cookies } from "next/headers";
 import EditEventDateForm from "@/components/admin/EditEventDateForm";
 import RegistrationActions from "@/components/admin/RegistrationActions";
 
-type RegistrationRecord = {
-  id: number;
-  name: string;
-  email: string;
-  attendees: number | null;
-  paid: boolean;
-};
+interface PageProps {
+  params: {
+    id: string;
+    dateId: string;
+  };
+}
 
-export default async function Page({ params }: { params: { id: string; dateId: string } }) {
+export default async function EditEventDatePage({
+  params,
+}: PageProps): Promise<JSX.Element> {
   const { id, dateId } = params;
 
-  const cookieStore = cookies() as any;
+  const cookieStore = await cookies();
   if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
@@ -32,33 +33,36 @@ export default async function Page({ params }: { params: { id: string; dateId: s
   });
   if (!raw || raw.eventId !== eventId) return notFound();
 
-  const dateItem = {
-    id: raw.id,
-    date: raw.date,
-    capacity: raw.capacity,
-    registrations: raw.registrations as RegistrationRecord[],
-  };
+  type RegistrationRecord = typeof raw.registrations[number];
 
-  const totalRegistered = dateItem.registrations.reduce((sum, r) => sum + (r.attendees ?? 1), 0);
-  const remaining = dateItem.capacity - totalRegistered;
+  const totalRegistered = raw.registrations.reduce(
+    (sum: number, r: RegistrationRecord) => sum + (r.attendees ?? 1),
+    0
+  );
+  const remaining = raw.capacity - totalRegistered;
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Upravit termín akce</h1>
-
-      <EditEventDateForm eventId={eventId} dateId={dateItem.id} initialDate={dateItem.date.toISOString()} initialCapacity={dateItem.capacity} />
+      <EditEventDateForm
+        eventId={eventId}
+        dateId={raw.id}
+        initialDate={raw.date.toISOString()}
+        initialCapacity={raw.capacity}
+      />
 
       <p className="mt-6">
-        Kapacita: {dateItem.capacity} &nbsp;|&nbsp; Zbývá volných míst: {remaining}
+        Kapacita: {raw.capacity} &nbsp;|&nbsp; Zbývá volných míst: {remaining}
       </p>
 
       <h2 className="text-xl font-bold mt-8 mb-4">Registrace na tento termín</h2>
-      {dateItem.registrations.length > 0 ? (
+      {raw.registrations.length > 0 ? (
         <ul className="space-y-2">
-          {dateItem.registrations.map((r) => (
+          {raw.registrations.map((r: RegistrationRecord) => (
             <li key={r.id} className="flex justify-between items-center">
               <span>
-                {r.name} ({r.email}) – {r.attendees ?? 1} osob {r.paid && <strong>(✅ zaplaceno)</strong>}
+                {r.name} ({r.email}) – {r.attendees ?? 1} osob{" "}
+                {r.paid && <strong>(✅ zaplaceno)</strong>}
               </span>
               <RegistrationActions
                 registration={{
@@ -68,7 +72,6 @@ export default async function Page({ params }: { params: { id: string; dateId: s
                   attendees: r.attendees ?? 1,
                   paid: r.paid,
                 }}
-                eventId={eventId}
               />
             </li>
           ))}

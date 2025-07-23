@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import DeleteButton from "../../../components/DeleteButton";
 
 export default async function AdminEventsPage() {
-  const cookieStore = cookies() as any;
+  const cookieStore = await cookies();
   const isAdmin = cookieStore.get("admin-auth")?.value === "true";
 
   if (!isAdmin) {

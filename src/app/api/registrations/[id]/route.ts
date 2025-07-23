@@ -76,8 +76,14 @@ export async function DELETE(
   try {
     await prisma.registration.delete({ where: { id: regId } });
     return NextResponse.json({ message: "Registrace smazána." });
-  } catch (err: any) {
-    if (err.code === "P2025") {
+  } catch (err) {
+    // Typově bezpečnější kontrola kódu chyby
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      (err as { code?: string }).code === "P2025"
+    ) {
       // Záznam neexistuje
       return NextResponse.json(
         { error: "Registrace k smazání nebyla nalezena." },

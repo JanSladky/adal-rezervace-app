@@ -12,10 +12,8 @@ export type RegistrationWithPaid = {
 
 export default function RegistrationActions({
   registration,
-  eventId,
 }: {
   registration: RegistrationWithPaid;
-  eventId: number;
 }) {
   const router = useRouter();
 
@@ -39,22 +37,14 @@ export default function RegistrationActions({
   return (
     <div className="flex items-center gap-2">
       {registration.paid ? (
-        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
-          Zaplaceno
-        </span>
+        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Zaplaceno</span>
       ) : (
-        <button
-          className="bg-green-500 text-white px-2 py-1 rounded text-sm"
-          onClick={markPaid}
-        >
+        <button className="bg-green-500 text-white px-2 py-1 rounded text-sm" onClick={markPaid}>
           Označit zaplaceno
         </button>
       )}
 
-      <button
-        className="bg-red-500 text-white px-2 py-1 rounded text-sm"
-        onClick={remove}
-      >
+      <button className="bg-red-500 text-white px-2 py-1 rounded text-sm" onClick={remove}>
         Smazat registraci
       </button>
     </div>
