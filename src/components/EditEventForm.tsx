@@ -10,6 +10,7 @@ type EditEventFormProps = {
     description: string;
     difficulty: "nenarocne" | "stredne_narocne" | "narocne";
     image: string;
+    duration: number;
   };
 };
 
@@ -19,6 +20,7 @@ export default function EditEventForm({ event }: EditEventFormProps) {
     location: event.location,
     description: event.description,
     difficulty: event.difficulty,
+    duration: event.duration.toString(),
   });
   const [file, setFile] = useState<File | null>(null);
 
@@ -45,7 +47,7 @@ export default function EditEventForm({ event }: EditEventFormProps) {
     await fetch(`/api/events/${event.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, image: imageUrl }),
+      body: JSON.stringify({ ...form, duration: Number(form.duration), image: imageUrl }),
     });
 
     window.location.href = "/admin/events";
@@ -53,34 +55,22 @@ export default function EditEventForm({ event }: EditEventFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+      <input type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} required />
       <input
-        type="text"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        type="number"
+        value={form.duration}
+        onChange={(e) => setForm({ ...form, duration: e.target.value })}
+        placeholder="Délka trvání (v minutách)"
+        min={1}
         required
       />
-      <input
-        type="text"
-        value={form.location}
-        onChange={(e) => setForm({ ...form, location: e.target.value })}
-        required
-      />
-      <select
-        value={form.difficulty}
-        onChange={(e) =>
-          setForm({ ...form, difficulty: e.target.value as EditEventFormProps["event"]["difficulty"] })
-        }
-        required
-      >
+      <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value as EditEventFormProps["event"]["difficulty"] })} required>
         <option value="nenarocne">Nenáročné</option>
         <option value="stredne_narocne">Středně náročné</option>
         <option value="narocne">Náročné</option>
       </select>
-      <textarea
-        value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-        required
-      />
+      <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
       <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       <button type="submit" className="bg-blue-500 text-white p-2 rounded">
         Uložit změny

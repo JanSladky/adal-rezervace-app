@@ -7,9 +7,9 @@ type Context = {
 
 export async function PUT(request: Request, { params }: Context) {
   const id = Number(params.id);
-  const { name, location, description, difficulty, image } = await request.json();
+  const { name, location, description, difficulty, image, duration} = await request.json();
 
-  if (!name || !location || !description || !difficulty || !image) {
+  if (!name || !location || !description || !difficulty || !image || duration === undefined || typeof duration !== "number" || duration <= 0) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -22,6 +22,7 @@ export async function PUT(request: Request, { params }: Context) {
         description,
         difficulty,
         image,
+        duration
       },
     });
 

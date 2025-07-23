@@ -20,6 +20,7 @@ model Event {
   amountCZK      Int             @default(0)        // Výchozí hodnota
   variableSymbol String          @default("0000")   // Výchozí hodnota
   accountNumber  String          @default("000000") // Výchozí hodnota
+  duration       String
 }
 
 model Registration {

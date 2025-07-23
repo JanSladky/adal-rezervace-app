@@ -21,7 +21,14 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      location: true,
+      description: true,
+      difficulty: true,
+      duration: true, // ← přidáno!
       eventDates: {
         include: { registrations: true },
       },
@@ -39,6 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     location: event.location,
     description: event.description,
     difficulty: event.difficulty as "nenarocne" | "stredne_narocne" | "narocne",
+    duration: event.duration,
   } as const;
 
   return (

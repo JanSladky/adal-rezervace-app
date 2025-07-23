@@ -9,9 +9,9 @@ type Context = {
 export async function PUT(request: Request, { params }: Context) {
   const id = Number(params.id);
 
-  const { name, capacity, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber } = await request.json();
+  const { name, capacity, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber, duration } = await request.json();
 
-  if (!name || !capacity || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber) {
+  if (!name || !capacity || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber || !duration === undefined || duration === null) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -27,6 +27,7 @@ export async function PUT(request: Request, { params }: Context) {
         amountCZK: Number(amountCZK),
         variableSymbol,
         accountNumber,
+        duration: Number(duration),
       },
     });
 
