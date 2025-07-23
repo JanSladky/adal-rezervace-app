@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 // POST = vytvoření nové akce
 export async function POST(request: Request) {
-  const { name, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber } = await request.json();
+  const { name, image, location, description, difficulty, amountCZK, variableSymbol, accountNumber, duration } = await request.json();
 
   if (!name || !image || !location || !description || !difficulty || !amountCZK || !variableSymbol || !accountNumber) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -20,6 +20,7 @@ export async function POST(request: Request) {
         amountCZK: Number(amountCZK),
         variableSymbol,
         accountNumber,
+        duration
       },
     });
 

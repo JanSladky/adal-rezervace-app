@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image"
 
 type Registration = {
   id: number;
@@ -32,7 +33,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      {event.image && <img src={event.image} alt={event.name} className="mb-4 rounded-md shadow-md max-h-64 w-full object-cover" />}
+      {event.image && <Image src={event.image} alt={event.name} width={600} height={400} className="mb-4 rounded-md shadow-md max-h-64 w-full object-cover" />}
       <h1 className="text-3xl font-bold mb-6">{event.name}</h1>
       {/* 📍 Místo konání */}
       {event.location && (
@@ -42,7 +43,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
       )}
 
       {/* 🧭 Obtížnost */}
-      {event.difficulty && (
+      {typeof event.difficulty === "string" && (
         <p className="text-gray-700 mb-1">
           <strong>Obtížnost:</strong> {event.difficulty}
         </p>

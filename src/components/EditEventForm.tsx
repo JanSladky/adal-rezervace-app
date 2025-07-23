@@ -33,24 +33,50 @@ export default function EditEventForm({ event }: EditEventFormProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-      const uploadData = await uploadRes.json();
-      if (uploadData.secure_url) {
-        imageUrl = uploadData.secure_url;
+        const uploadData = await uploadRes.json();
+        if (uploadData.secure_url) {
+          imageUrl = uploadData.secure_url;
+          console.log("🖼️ Upload OK:", imageUrl);
+        } else {
+          console.warn("⚠️ Upload failed", uploadData);
+        }
+      } catch (err) {
+        console.error("❌ Upload error:", err);
       }
     }
 
-    await fetch(`/api/events/${event.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, duration: Number(form.duration), image: imageUrl }),
-    });
+    const payload = {
+      ...form,
+      duration: form.duration,
+      image: imageUrl,
+    };
 
-    window.location.href = "/admin/events";
+    console.log("📤 Odesílám data:", payload);
+
+    try {
+      const res = await fetch(`/api/events/${event.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error("❌ Chyba při ukládání:", errData);
+        return;
+      }
+
+      console.log("✅ Úspěšně uloženo");
+      window.location.href = "/admin/events";
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+    }
   };
 
   return (
@@ -58,14 +84,23 @@ export default function EditEventForm({ event }: EditEventFormProps) {
       <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
       <input type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} required />
       <input
-        type="number"
+        type="text"
         value={form.duration}
         onChange={(e) => setForm({ ...form, duration: e.target.value })}
         placeholder="Délka trvání (v minutách)"
         min={1}
         required
       />
-      <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value as EditEventFormProps["event"]["difficulty"] })} required>
+      <select
+        value={form.difficulty}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            difficulty: e.target.value as EditEventFormProps["event"]["difficulty"],
+          })
+        }
+        required
+      >
         <option value="nenarocne">Nenáročné</option>
         <option value="stredne_narocne">Středně náročné</option>
         <option value="narocne">Náročné</option>

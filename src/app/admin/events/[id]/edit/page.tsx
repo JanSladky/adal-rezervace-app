@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     location: event.location,
     description: event.description,
     difficulty: event.difficulty as "nenarocne" | "stredne_narocne" | "narocne",
-    duration: event.duration,
+    duration: Number(event.duration),
   } as const;
 
   return (
