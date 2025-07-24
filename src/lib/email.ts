@@ -1,5 +1,6 @@
 // src/lib/email.ts
 import nodemailer from "nodemailer";
+import { generatePaymentQR } from "../lib/generatePaymentQR";
 
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -20,14 +21,17 @@ export type RegistrationData = {
   attendees: number;
   eventName: string;
   eventLocation: string;
-  eventDate: string; // ISO string nebo již formátovaný
+  eventDate: string;
   adminEmail: string;
   variableSymbol: string;
   amountCZK: number;
-  qrCodeUrl?: string;
+  accountNumber: string;
 };
 
 export async function sendRegistrationEmails(data: RegistrationData) {
+  // Vygeneruj QR jako PNG (Buffer)
+  const qrPngBuffer = generatePaymentQR(data.amountCZK, data.variableSymbol, data.accountNumber);
+
   // E-mail uživateli
   await transporter.sendMail({
     from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
@@ -39,10 +43,20 @@ export async function sendRegistrationEmails(data: RegistrationData) {
       <p><strong>Termín:</strong> ${data.eventDate}</p>
       <p><strong>Místo konání:</strong> ${data.eventLocation}</p>
       <p><strong>Počet osob:</strong> ${data.attendees}</p>
-      <p><strong>Platba:</strong> ${data.amountCZK} Kč, variabilní symbol: ${data.variableSymbol}</p>
-      ${data.qrCodeUrl ? `<p><img src="${data.qrCodeUrl}" alt="QR Platba" width="200" /></p>` : ""}
+      <p><strong>Platba:</strong> ${data.amountCZK} Kč</p>
+      <p><strong>Variabilní symbol:</strong> ${data.variableSymbol}</p>
+      <p>Naskenujte QR kód níže pro snadnou platbu:</p>
+      <p><img src="cid:qr-code" alt="QR Platba" width="200" /></p>
       <p>Děkujeme a těšíme se na Vás!</p>
     `,
+    attachments: [
+      {
+        filename: "qr-platba.png",
+        content: qrPngBuffer,
+        cid: "qr-code", // použitý v <img src="cid:qr-code" />
+        contentType: "image/png",
+      },
+    ],
   });
 
   // E-mail administrátorovi
@@ -76,7 +90,14 @@ export interface PaymentConfirmationData {
   eventDate: string; // ISO string
 }
 
-export async function sendPaymentConfirmationEmail({ registrationId, userName, userEmail, eventName, eventLocation, eventDate }: PaymentConfirmationData) {
+export async function sendPaymentConfirmationEmail({
+  registrationId,
+  userName,
+  userEmail,
+  eventName,
+  eventLocation,
+  eventDate,
+}: PaymentConfirmationData) {
   // E-mail uživateli
   await transporter.sendMail({
     from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
@@ -84,14 +105,14 @@ export async function sendPaymentConfirmationEmail({ registrationId, userName, u
     subject: `Potvrzení platby – ${eventName}`,
     html: `
       <p>Dobrý den ${userName},</p>
-      <p>vaše platba za registraci č. <strong>${registrationId}</strong> na akci <strong>${eventName}</strong> (${new Date(eventDate).toLocaleString(
-      "cs-CZ"
-    )}) byla úspěšně přijata.</p>
+      <p>vaše platba za registraci č. <strong>${registrationId}</strong> na akci <strong>${eventName}</strong> (${new Date(
+      eventDate
+    ).toLocaleString("cs-CZ")}) byla úspěšně přijata.</p>
       <p>Těšíme se na vás na místě konání: ${eventLocation}.</p>
     `,
   });
 
-  // (Volitelně) notifikace administrátorovi
+  // Notifikace administrátorovi
   await transporter.sendMail({
     from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
     to: process.env.ADMIN_EMAIL,
