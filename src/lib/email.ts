@@ -39,7 +39,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
 
         <p>Dobrý den <strong>${data.userName}</strong>,</p>
         <p>děkujeme za Vaši registraci na akci <strong>${data.eventName}</strong>.</p>
-
+        <h3 style="margin-top: 32px; font-size: 18px;">💸Informace o akci</h3>
         <div style="background-color:#f4f4f5;border-left:5px solid #ff7f00;padding:16px;margin-bottom:24px;border-radius:6px;">
           <p style="margin:0;">
             📅 <strong>Termín:</strong> ${data.eventDate}<br/>
