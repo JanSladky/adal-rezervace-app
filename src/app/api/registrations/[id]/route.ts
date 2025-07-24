@@ -1,7 +1,10 @@
-// src/app/api/registrations/[id]/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { sendPaymentConfirmationEmail } from "@/lib/email";
+
+import {
+  sendPaymentConfirmationEmail,
+  sendCancellationEmail,
+} from "../../../../lib/email";
 
 type Context = {
   params: { id: string };
@@ -44,7 +47,7 @@ export async function PATCH(request: Request, context: Context) {
   }
 }
 
-// DELETE – smaže registraci
+// DELETE – smaže registraci a pošle email
 export async function DELETE(request: Request, context: Context) {
   const regId = Number(context.params.id);
   if (isNaN(regId)) {
@@ -52,17 +55,33 @@ export async function DELETE(request: Request, context: Context) {
   }
 
   try {
+    const registration = await prisma.registration.findUnique({
+      where: { id: regId },
+      include: {
+        event: { select: { name: true, location: true } },
+        eventDate: true,
+      },
+    });
+
+    if (!registration) {
+      return NextResponse.json({ error: "Registrace nebyla nalezena." }, { status: 404 });
+    }
+
     await prisma.registration.delete({ where: { id: regId } });
+
+    // Pošleme e-mail o zrušení
+    if (registration.email) {
+      await sendCancellationEmail({
+        userName: registration.name,
+        userEmail: registration.email,
+        eventName: registration.event.name,
+        eventLocation: registration.event.location,
+        eventDate: registration.eventDate.date.toISOString(),
+      });
+    }
+
     return NextResponse.json({ message: "Registrace smazána." });
   } catch (err) {
-    if (
-      typeof err === "object" &&
-      err !== null &&
-      "code" in err &&
-      (err as { code?: string }).code === "P2025"
-    ) {
-      return NextResponse.json({ error: "Registrace k smazání nebyla nalezena." }, { status: 404 });
-    }
     console.error("Chyba při mazání registrace:", err);
     return NextResponse.json({ error: "Chyba při mazání registrace." }, { status: 500 });
   }

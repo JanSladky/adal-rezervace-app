@@ -28,7 +28,6 @@ export type RegistrationData = {
 export async function sendRegistrationEmails(data: RegistrationData) {
   const qrPngBuffer = generatePaymentQR(data.amountCZK, data.variableSymbol, data.accountNumber);
 
-  // E-mail uživateli
   await transporter.sendMail({
     from: `"Adál – potvrzení rezervace" <${process.env.SMTP_USER}>`,
     to: data.userEmail,
@@ -39,7 +38,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
 
         <p>Dobrý den <strong>${data.userName}</strong>,</p>
         <p>děkujeme za Vaši registraci na akci <strong>${data.eventName}</strong>.</p>
-        <h3 style="margin-top: 32px; font-size: 18px;">💸Informace o akci</h3>
+        <h3 style="margin-top: 32px; font-size: 18px;">💸 Informace o akci</h3>
         <div style="background-color:#f4f4f5;border-left:5px solid #ff7f00;padding:16px;margin-bottom:24px;border-radius:6px;">
           <p style="margin:0;">
             📅 <strong>Termín:</strong> ${data.eventDate}<br/>
@@ -61,7 +60,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
         <p style="font-size: 14px; color: #555;"><em>Nemáte-li chytrý telefon? Platbu můžete zadat ručně podle výše uvedených údajů.</em></p>
 
         <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;" />
-        <p style="font-size: 14px;">Děkujeme a těšíme se na Vás!<br/>Tým Vaší Aplikace</p>
+        <p style="font-size: 14px;">Děkujeme a těšíme se na Vás!<br/>Tým A dál?</p>
       </div>
     `,
     attachments: [
@@ -74,7 +73,6 @@ export async function sendRegistrationEmails(data: RegistrationData) {
     ],
   });
 
-  // E-mail administrátorovi
   await transporter.sendMail({
     from: `"Nová registrace – ${data.eventName}" <${process.env.SMTP_USER}>`,
     to: data.adminEmail,
@@ -103,7 +101,14 @@ export interface PaymentConfirmationData {
   eventDate: string;
 }
 
-export async function sendPaymentConfirmationEmail({ registrationId, userName, userEmail, eventName, eventLocation, eventDate }: PaymentConfirmationData) {
+export async function sendPaymentConfirmationEmail({
+  registrationId,
+  userName,
+  userEmail,
+  eventName,
+  eventLocation,
+  eventDate,
+}: PaymentConfirmationData) {
   await transporter.sendMail({
     from: `"A dál? - potvrzení platby" <${process.env.SMTP_USER}>`,
     to: userEmail,
@@ -114,7 +119,7 @@ export async function sendPaymentConfirmationEmail({ registrationId, userName, u
         <p>Dobrý den <strong>${userName}</strong>,</p>
         <p>Vaše platba za registraci na akci <strong>${eventName}</strong> (${new Date(eventDate).toLocaleString("cs-CZ")}) byla úspěšně přijata.</p>
         <p>Těšíme se na vás na místě konání: <strong>${eventLocation}</strong>.</p>
-        <p style="margin-top: 24px; font-size: 14px;">Děkujeme,<br/>Tým Vaší Aplikace</p>
+        <p style="margin-top: 24px; font-size: 14px;">Děkujeme,<br/>Tým A dál?</p>
       </div>
     `,
   });
@@ -126,11 +131,43 @@ export async function sendPaymentConfirmationEmail({ registrationId, userName, u
     html: `
       <div style="font-family: Arial, sans-serif; color: #111; background: #fff; padding: 24px; max-width: 600px; margin: auto; border-radius: 8px;">
         <h2 style="font-size: 20px;">💰 Platba přijata</h2>
-        <p>Byla potvrzena platba za registraci</p>
+        <p>Byla potvrzena platba za registraci:</p>
         <ul>
           <li><strong>🗓️ Akce:</strong> ${eventName}</li>
           <li><strong>📍 Datum:</strong> ${new Date(eventDate).toLocaleString("cs-CZ")}</li>
         </ul>
+      </div>
+    `,
+  });
+}
+
+export interface CancellationEmailData {
+  userName: string;
+  userEmail: string;
+  eventName: string;
+  eventLocation: string;
+  eventDate: string;
+}
+
+export async function sendCancellationEmail({
+  userName,
+  userEmail,
+  eventName,
+  eventLocation,
+  eventDate,
+}: CancellationEmailData) {
+  await transporter.sendMail({
+    from: `"A dál? - zrušení registrace" <${process.env.SMTP_USER}>`,
+    to: userEmail,
+    subject: `Zrušení registrace – ${eventName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111; background: #fff; padding: 24px; max-width: 600px; margin: auto; border-radius: 8px;">
+        <h2 style="color: #b91c1c;">❌ Zrušení registrace</h2>
+        <p>Dobrý den <strong>${userName}</strong>,</p>
+        <p>bohužel jsme museli zrušit Vaši registraci na akci <strong>${eventName}</strong>, která se měla konat dne <strong>${new Date(eventDate).toLocaleString("cs-CZ")}</strong> na místě <strong>${eventLocation}</strong>.</p>
+        <p>Důvodem je neobdržená platba a potřeba uvolnit místo dalším účastníkům.</p>
+        <p>Pokud se jedná o nedorozumění, neváhejte nás kontaktovat.</p>
+        <p style="margin-top: 24px; font-size: 14px;">Děkujeme za pochopení,<br/>Tým A dál?</p>
       </div>
     `,
   });
