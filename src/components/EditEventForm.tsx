@@ -10,7 +10,7 @@ type EditEventFormProps = {
     description: string;
     difficulty: "nenarocne" | "stredne_narocne" | "narocne";
     image: string;
-    duration: number;
+    duration: string;
   };
 };
 
