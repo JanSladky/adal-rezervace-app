@@ -10,9 +10,9 @@ export default function AddEventPage() {
     location: "",
     difficulty: "nenarocne",
     description: "",
-    amountCZK: "",
+    amountCZK: "100",
     variableSymbol: "",
-    accountNumber: "",
+    accountNumber: "12345678/0100",
   });
   const [file, setFile] = useState<File | null>(null);
 
