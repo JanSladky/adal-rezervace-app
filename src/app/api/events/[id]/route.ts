@@ -5,55 +5,39 @@ type Context = {
   params: { id: string };
 };
 
+// PUT – úprava akce
 export async function PUT(request: Request, context: Context) {
-  const id = Number(context.params.id);
+  const { id: idParam } = context.params;
+  const id = Number(idParam);
   const { name, location, description, difficulty, image, duration } = await request.json();
 
-  // ✅ Validace stringových polí
-  if (
-    !name ||
-    !location ||
-    !description ||
-    !difficulty ||
-    !image ||
-    typeof duration !== "string" ||
-    duration.trim() === ""
-  ) {
+  if (!name || !location || !description || !difficulty || !image || typeof duration !== "string" || duration.trim() === "") {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }
 
   try {
-    // ✅ žádný Number() – duration je string jako "35–45"
     const updatedEvent = await prisma.event.update({
       where: { id },
-      data: {
-        name,
-        location,
-        description,
-        difficulty,
-        image,
-        duration,
-      },
+      data: { name, location, description, difficulty, image, duration },
     });
 
     return NextResponse.json(updatedEvent);
   } catch (error) {
     console.error("❌ Server error:", error);
-
     const message = error instanceof Error ? error.message : "Chyba při aktualizaci.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+// GET – detail akce
 export async function GET(_request: Request, context: Context) {
-  const id = Number(context.params.id);
+  const { id: idParam } = context.params;
+  const id = Number(idParam);
 
   try {
     const event = await prisma.event.findUnique({
       where: { id },
-      include: {
-        eventDates: true,
-      },
+      include: { eventDates: true },
     });
 
     if (!event) {
@@ -63,14 +47,15 @@ export async function GET(_request: Request, context: Context) {
     return NextResponse.json(event);
   } catch (error) {
     console.error("❌ Chyba při načítání:", error);
-
     const message = error instanceof Error ? error.message : "Chyba při načítání.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+// DELETE – smaže akci + navázané entity
 export async function DELETE(_request: Request, context: Context) {
-  const id = Number(context.params.id);
+  const { id: idParam } = context.params;
+  const id = Number(idParam);
 
   try {
     await prisma.$transaction([
@@ -82,7 +67,6 @@ export async function DELETE(_request: Request, context: Context) {
     return NextResponse.json({ message: "Akce a všechny návaznosti byly smazány." });
   } catch (error) {
     console.error("❌ Chyba při mazání:", error);
-
     const message = error instanceof Error ? error.message : "Chyba při mazání.";
     return NextResponse.json({ error: message }, { status: 500 });
   }

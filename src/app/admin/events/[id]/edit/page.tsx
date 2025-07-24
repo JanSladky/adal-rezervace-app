@@ -9,13 +9,14 @@ import AddEventDateForm from "@/components/admin/AddEventDateForm";
 import DeleteEventDateButton from "@/components/admin/DeleteEventDateButton";
 import RegistrationActions from "@/components/admin/RegistrationActions";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(context: { params: { id: string } }) {
+  const { params } = context;
+
   const cookieStore = await cookies();
   if (cookieStore.get("admin-auth")?.value !== "true") {
     redirect("/login");
   }
 
-  // ✅ async/await můžeš použít, protože funkce Page je async
   const eventId = Number(params.id);
   if (isNaN(eventId)) return notFound();
 
@@ -28,7 +29,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       location: true,
       description: true,
       difficulty: true,
-      duration: true, // ← přidáno!
+      duration: true,
       eventDates: {
         include: { registrations: true },
       },
