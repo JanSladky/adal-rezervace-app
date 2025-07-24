@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image"
+import Image from "next/image";
+import { formatDifficulty } from "../../../utils/formatters";
 
 type Registration = {
   id: number;
@@ -45,7 +46,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
       {/* 🧭 Obtížnost */}
       {typeof event.difficulty === "string" && (
         <p className="text-gray-700 mb-1">
-          <strong>Obtížnost:</strong> {event.difficulty}
+          <strong>Obtížnost:</strong> {formatDifficulty(event.difficulty)}
         </p>
       )}
       {/* ⏱️ Časová náročnost */}

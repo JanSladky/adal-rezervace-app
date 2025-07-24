@@ -26,6 +26,7 @@ export type RegistrationData = {
   variableSymbol: string;
   amountCZK: number;
   accountNumber: string;
+  qrCodeUrl: string;
 };
 
 export async function sendRegistrationEmails(data: RegistrationData) {
