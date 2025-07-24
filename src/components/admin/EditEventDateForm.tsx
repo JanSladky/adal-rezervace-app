@@ -10,11 +10,19 @@ type Props = {
   initialCapacity: number;
 };
 
+// Pomocná funkce pro správný formát inputu
+function toDatetimeLocal(iso: string) {
+  const date = new Date(iso);
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+}
+
 export default function EditEventDateForm({ eventId, dateId, initialDate, initialCapacity }: Props) {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    date: initialDate,
+    date: toDatetimeLocal(initialDate),
     capacity: initialCapacity,
   });
 
