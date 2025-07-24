@@ -1,3 +1,4 @@
+// src/app/api/registrations/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { generatePaymentQR } from "@/lib/qr";
@@ -26,9 +27,19 @@ export async function POST(request: Request) {
     const [event, eventDate] = await Promise.all([
       prisma.event.findUnique({
         where: { id: Number(eventId) },
+        select: {
+          name: true,
+          location: true,
+          amountCZK: true,
+          variableSymbol: true,
+          accountNumber: true, // 👈 musíš načíst explicitně
+        },
       }),
       prisma.eventDate.findUnique({
         where: { id: Number(eventDateId) },
+        select: {
+          date: true,
+        },
       }),
     ]);
 
@@ -39,7 +50,7 @@ export async function POST(request: Request) {
     // 3️⃣ Spočítat celkovou cenu podle počtu osob
     const totalAmount = event.amountCZK * Number(attendees);
 
-    // 4️⃣ Vygenerovat QR kód
+    // 4️⃣ Vygenerovat QR kód (např. pro zobrazení ve FE nebo odeslání e-mailem)
     const qrCodeUrl = generatePaymentQR(totalAmount, event.variableSymbol, event.accountNumber);
 
     // 5️⃣ Odeslat e-maily
@@ -49,11 +60,12 @@ export async function POST(request: Request) {
       attendees: Number(attendees),
       eventName: event.name,
       eventLocation: event.location,
-      eventDate: new Date(eventDate.date).toLocaleString("cs-CZ"),
-      adminEmail: process.env.ADMIN_EMAIL || "vasadmin@email.cz",
+      eventDate: eventDate.date.toLocaleString("cs-CZ"),
+      adminEmail: process.env.ADMIN_EMAIL!,
       variableSymbol: event.variableSymbol,
       amountCZK: totalAmount,
-      qrCodeUrl,
+      accountNumber: event.accountNumber,
+      qrCodeUrl, // pokud typ potřebuješ, můžeš přidat i do email.ts
     });
 
     return NextResponse.json({ message: "Registrace úspěšná." });
