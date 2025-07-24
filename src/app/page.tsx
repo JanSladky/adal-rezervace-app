@@ -12,22 +12,24 @@ export default async function HomePage() {
   });
 
   return (
-    <main className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Veřejné akce</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <main className="p-4 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Rezervační systém na akce pořádané spolkem A dál?</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event: { id: number; name: string; image: string }) => (
-          <Link key={event.id} href={`/event/${event.id}`}>
-            <div className="p-4 bg-white shadow rounded hover:bg-gray-50">
+          <Link key={event.id} href={`/event/${event.id}`} className="group">
+            <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 hover:scale-[1.02] transform">
               {event.image && (
                 <Image
                   src={event.image}
                   alt={event.name}
-                  width={400}
-                  height={250}
-                  className="w-full h-auto rounded mb-2"
+                  width={600}
+                  height={400}
+                  className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity duration-300"
                 />
               )}
-              <h2 className="text-xl font-semibold">{event.name}</h2>
+              <div className="p-4">
+                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{event.name}</h2>
+              </div>
             </div>
           </Link>
         ))}
