@@ -22,7 +22,10 @@ type EventDate = {
 
 export default async function RegisterPage({ params, searchParams }: PageProps) {
   const eventId = parseInt(params.id);
-  const dateId = parseInt(searchParams.dateId ?? "");
+  if (!searchParams.dateId || isNaN(Number(searchParams.dateId))) {
+    return notFound();
+  }
+  const dateId = Number(searchParams.dateId);
 
   if (isNaN(eventId) || isNaN(dateId)) {
     return notFound();
@@ -42,14 +45,11 @@ export default async function RegisterPage({ params, searchParams }: PageProps) 
   const date = event.eventDates.find((d: EventDate) => d.id === dateId);
   if (!date) return notFound();
 
-  const alreadyRegistered = date.registrations.reduce(
-    (sum: number, r: Registration) => sum + (r.attendees ?? 1),
-    0
-  );
+  const alreadyRegistered = date.registrations.reduce((sum: number, r: Registration) => sum + (r.attendees ?? 1), 0);
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Registrace na akci</h1>
+      <h1 className="text-2xl font-bold mb-4">Registrovat se akci</h1>
       <p className="mb-2">{event.name}</p>
 
       <RegistrationForm

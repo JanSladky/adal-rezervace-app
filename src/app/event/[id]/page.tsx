@@ -34,28 +34,35 @@ export default async function EventDetailPage({ params }: { params: { id: string
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      {event.image && <Image src={event.image} alt={event.name} width={600} height={400} className="mb-4 rounded-md shadow-md max-h-64 w-full object-cover" />}
+      {event.image && (
+        <Image
+          src={event.image}
+          alt={event.name}
+          width={600}
+          height={400}
+          className="mb-4 rounded-md shadow-md max-h-64 w-full object-cover"
+        />
+      )}
       <h1 className="text-3xl font-bold mb-6">{event.name}</h1>
-      {/* 📍 Místo konání */}
+
       {event.location && (
         <p className="text-gray-700 mb-1">
           <strong>Místo konání:</strong> {event.location}
         </p>
       )}
 
-      {/* 🧭 Obtížnost */}
       {typeof event.difficulty === "string" && (
         <p className="text-gray-700 mb-1">
           <strong>Obtížnost:</strong> {formatDifficulty(event.difficulty)}
         </p>
       )}
-      {/* ⏱️ Časová náročnost */}
+
       {"duration" in event && event.duration && (
         <p className="text-gray-700 mb-1">
           <strong>Doba trvání:</strong> {event.duration} minut
         </p>
       )}
-      {/* 📝 Popis akce */}
+
       {event.description && (
         <div className="mt-4 mb-8">
           <h2 className="text-xl font-semibold mb-2">O akci</h2>
@@ -66,7 +73,10 @@ export default async function EventDetailPage({ params }: { params: { id: string
       <h2 className="text-2xl font-semibold mb-4">Dostupné termíny</h2>
       <ul className="space-y-4">
         {event.eventDates.map((date: EventDate) => {
-          const totalRegistered = date.registrations.reduce((sum: number, r: Registration) => sum + (r.attendees ?? 1), 0);
+          const totalRegistered = date.registrations.reduce(
+            (sum: number, r: Registration) => sum + (r.attendees ?? 1),
+            0
+          );
           const remaining = date.capacity - totalRegistered;
           const pct = Math.min(100, Math.round((totalRegistered / date.capacity) * 100));
 
@@ -79,13 +89,19 @@ export default async function EventDetailPage({ params }: { params: { id: string
                 })}
               </div>
               <div className="w-full bg-gray-200 h-2 rounded mb-2">
-                <div className="h-2 rounded bg-green-500" style={{ width: `${pct}%` }} />
+                <div
+                  className="h-2 rounded bg-green-500"
+                  style={{ width: `${pct}%` }}
+                />
               </div>
               <div className="mb-4 text-sm text-gray-700">
                 {totalRegistered} / {date.capacity} přihlášeno
               </div>
               {remaining > 0 ? (
-                <Link href={`/event/${eventId}/register?dateId=${date.id}`} className="inline-block bg-blue-600 text-white px-4 py-2 rounded">
+                <Link
+                  href={`/event/${eventId}/register?dateId=${date.id}`}
+                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                >
                   Registrovat se
                 </Link>
               ) : (
