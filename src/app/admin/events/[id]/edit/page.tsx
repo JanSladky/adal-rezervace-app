@@ -8,6 +8,7 @@ import EditEventForm from "@/components/EditEventForm";
 import AddEventDateForm from "@/components/admin/AddEventDateForm";
 import DeleteEventDateButton from "@/components/admin/DeleteEventDateButton";
 import RegistrationActions from "@/components/admin/RegistrationActions";
+import { formatDifficulty } from "../../../../../utils/formatters"; // ⬅️ funkci načítáme zde
 
 export default async function Page(context: { params: { id: string } }) {
   const { params } = context;
@@ -57,7 +58,10 @@ export default async function Page(context: { params: { id: string } }) {
       <h2 className="text-xl font-bold mt-8 mb-4">Termíny akce</h2>
       <ul className="flex flex-col gap-6 mb-4">
         {event.eventDates.map((dateItem: DateItem) => {
-          const totalRegistered = dateItem.registrations.reduce((sum: number, r: Reg) => sum + (r.attendees ?? 1), 0);
+          const totalRegistered = dateItem.registrations.reduce(
+            (sum: number, r: Reg) => sum + (r.attendees ?? 1),
+            0
+          );
           const remaining = dateItem.capacity - totalRegistered;
           const unpaid = dateItem.registrations.filter((r: Reg) => !r.paid);
           const paid = dateItem.registrations.filter((r: Reg) => r.paid);
@@ -79,7 +83,10 @@ export default async function Page(context: { params: { id: string } }) {
                 </div>
                 <div className="flex gap-2">
                   <DeleteEventDateButton eventId={event.id} dateId={dateItem.id} />
-                  <a href={`/admin/events/${event.id}/dates/${dateItem.id}/edit`} className="bg-blue-500 text-white px-2 py-1 rounded text-sm">
+                  <a
+                    href={`/admin/events/${event.id}/dates/${dateItem.id}/edit`}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                  >
                     Upravit termín
                   </a>
                 </div>
@@ -118,7 +125,8 @@ export default async function Page(context: { params: { id: string } }) {
                     {paid.map((r: Reg) => (
                       <li key={r.id} className="flex justify-between items-center">
                         <span>
-                          {r.name} ({r.email}) – {r.attendees ?? 1} osob <strong className="ml-2 text-green-600">(✅ zaplaceno)</strong>
+                          {r.name} ({r.email}) – {r.attendees ?? 1} osob{" "}
+                          <strong className="ml-2 text-green-600">(✅ zaplaceno)</strong>
                         </span>
                         <RegistrationActions
                           registration={{
