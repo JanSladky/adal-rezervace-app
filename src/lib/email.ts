@@ -30,7 +30,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
 
   // E-mail uživateli
   await transporter.sendMail({
-    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    from: `"Adál – potvrzení rezervace" <${process.env.SMTP_USER}>`,
     to: data.userEmail,
     subject: `Potvrzení registrace na akci ${data.eventName}`,
     html: `
@@ -76,7 +76,7 @@ export async function sendRegistrationEmails(data: RegistrationData) {
 
   // E-mail administrátorovi
   await transporter.sendMail({
-    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    from: `"Nová registrace – ${data.eventName}" <${process.env.SMTP_USER}>`,
     to: data.adminEmail,
     subject: `Nová registrace na akci ${data.eventName}`,
     html: `
@@ -105,7 +105,7 @@ export interface PaymentConfirmationData {
 
 export async function sendPaymentConfirmationEmail({ registrationId, userName, userEmail, eventName, eventLocation, eventDate }: PaymentConfirmationData) {
   await transporter.sendMail({
-    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    from: `"A dál? - potvrzení platby" <${process.env.SMTP_USER}>`,
     to: userEmail,
     subject: `Potvrzení platby – ${eventName}`,
     html: `
@@ -120,13 +120,13 @@ export async function sendPaymentConfirmationEmail({ registrationId, userName, u
   });
 
   await transporter.sendMail({
-    from: `"Vaše Aplikace" <${process.env.SMTP_USER}>`,
+    from: `"A dál?" <${process.env.SMTP_USER}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `Platba přijata – registrace ${registrationId}`,
     html: `
       <div style="font-family: Arial, sans-serif; color: #111; background: #fff; padding: 24px; max-width: 600px; margin: auto; border-radius: 8px;">
         <h2 style="font-size: 20px;">💰 Platba přijata</h2>
-        <p>Byla potvrzena platba za registraci č. <strong>${registrationId}</strong></p>
+        <p>Byla potvrzena platba za registraci</p>
         <ul>
           <li><strong>🗓️ Akce:</strong> ${eventName}</li>
           <li><strong>📍 Datum:</strong> ${new Date(eventDate).toLocaleString("cs-CZ")}</li>
