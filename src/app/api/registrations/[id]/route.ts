@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import QRCode from "qrcode";
 
 import {
   sendPaymentConfirmationEmail,
@@ -10,7 +11,7 @@ type Context = {
   params: { id: string };
 };
 
-// PATCH – označí jako zaplacenou
+// PATCH – označí jako zaplacenou a odešle e-mail s QR kódem
 export async function PATCH(request: Request, context: Context) {
   const regId = Number(context.params.id);
   if (isNaN(regId)) {
@@ -31,6 +32,10 @@ export async function PATCH(request: Request, context: Context) {
       return NextResponse.json({ error: "Registrace nebyla nalezena." }, { status: 404 });
     }
 
+    // Vygeneruj QR kód s odkazem na check-in stránku
+    const checkinUrl = `${process.env.APP_URL}/checkin/${registration.id}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(checkinUrl);
+
     await sendPaymentConfirmationEmail({
       registrationId: registration.id,
       userName: registration.name,
@@ -38,6 +43,7 @@ export async function PATCH(request: Request, context: Context) {
       eventName: registration.event.name,
       eventLocation: registration.event.location,
       eventDate: registration.eventDate.date.toISOString(),
+      qrCodeUrl: qrCodeDataUrl,
     });
 
     return NextResponse.json({ message: "Označeno jako zaplaceno." });
@@ -69,7 +75,6 @@ export async function DELETE(request: Request, context: Context) {
 
     await prisma.registration.delete({ where: { id: regId } });
 
-    // Pošleme e-mail o zrušení
     if (registration.email) {
       await sendCancellationEmail({
         userName: registration.name,

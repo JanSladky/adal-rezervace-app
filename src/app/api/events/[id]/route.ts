@@ -5,34 +5,13 @@ type Context = {
   params: { id: string };
 };
 
-// PUT – úprava akce
-export async function PUT(request: Request, context: Context) {
-  const { id: idParam } = context.params;
-  const id = Number(idParam);
-  const { name, location, description, difficulty, image, duration } = await request.json();
-
-  if (!name || !location || !description || !difficulty || !image || typeof duration !== "string" || duration.trim() === "") {
-    return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
-  }
-
-  try {
-    const updatedEvent = await prisma.event.update({
-      where: { id },
-      data: { name, location, description, difficulty, image, duration },
-    });
-
-    return NextResponse.json(updatedEvent);
-  } catch (error) {
-    console.error("❌ Server error:", error);
-    const message = error instanceof Error ? error.message : "Chyba při aktualizaci.";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
-}
-
 // GET – detail akce
 export async function GET(_request: Request, context: Context) {
-  const { id: idParam } = context.params;
-  const id = Number(idParam);
+  const id = Number(context.params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "Neplatné ID akce." }, { status: 400 });
+  }
 
   try {
     const event = await prisma.event.findUnique({
@@ -41,21 +20,59 @@ export async function GET(_request: Request, context: Context) {
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: "Akce nebyla nalezena." }, { status: 404 });
     }
 
     return NextResponse.json(event);
   } catch (error) {
-    console.error("❌ Chyba při načítání:", error);
-    const message = error instanceof Error ? error.message : "Chyba při načítání.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("❌ Chyba při načítání akce:", error);
+    return NextResponse.json({ error: "Chyba serveru při načítání akce." }, { status: 500 });
   }
 }
 
-// DELETE – smaže akci + navázané entity
+// PUT – úprava akce
+export async function PUT(request: Request, context: Context) {
+  const id = Number(context.params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "Neplatné ID akce." }, { status: 400 });
+  }
+
+  const body = await request.json();
+  const { name, location, description, difficulty, image, duration } = body;
+
+  if (
+    !name ||
+    !location ||
+    !description ||
+    !difficulty ||
+    !image ||
+    typeof duration !== "string" ||
+    duration.trim() === ""
+  ) {
+    return NextResponse.json({ error: "Chybí nebo jsou neplatná pole." }, { status: 400 });
+  }
+
+  try {
+    const updated = await prisma.event.update({
+      where: { id },
+      data: { name, location, description, difficulty, image, duration },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("❌ Chyba při aktualizaci akce:", error);
+    return NextResponse.json({ error: "Chyba serveru při aktualizaci akce." }, { status: 500 });
+  }
+}
+
+// DELETE – smaže akci a související registrace a termíny
 export async function DELETE(_request: Request, context: Context) {
-  const { id: idParam } = context.params;
-  const id = Number(idParam);
+  const id = Number(context.params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "Neplatné ID akce." }, { status: 400 });
+  }
 
   try {
     await prisma.$transaction([
@@ -66,8 +83,7 @@ export async function DELETE(_request: Request, context: Context) {
 
     return NextResponse.json({ message: "Akce a všechny návaznosti byly smazány." });
   } catch (error) {
-    console.error("❌ Chyba při mazání:", error);
-    const message = error instanceof Error ? error.message : "Chyba při mazání.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("❌ Chyba při mazání akce:", error);
+    return NextResponse.json({ error: "Chyba serveru při mazání akce." }, { status: 500 });
   }
 }
