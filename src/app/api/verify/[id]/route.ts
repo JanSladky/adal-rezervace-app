@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "../../../../lib/db";
-import { registrations } from "../../../../lib/schema";
+import { registrations, events, eventDates } from "../../../../lib/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
@@ -10,22 +10,30 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 
   try {
-    const [registration] = await db
-      .select()
+    const [result] = await db
+      .select({
+        userName: registrations.name,
+        eventName: events.name,
+        eventDate: eventDates.date,
+        eventLocation: events.location,
+        isPaid: registrations.paid,
+      })
       .from(registrations)
       .where(eq(registrations.id, id))
+      .innerJoin(events, eq(registrations.eventId, events.id))
+      .innerJoin(eventDates, eq(registrations.eventDateId, eventDates.id))
       .limit(1);
 
-    if (!registration) {
+    if (!result) {
       return NextResponse.json({ error: "Registration not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      userName: registration.name,
-      eventName: registration.eventName,
-      eventDate: registration.eventDate,
-      eventLocation: registration.eventLocation,
-      isPaid: !!registration.isPaid,
+      userName: result.userName,
+      eventName: result.eventName,
+      eventDate: result.eventDate,
+      eventLocation: result.eventLocation,
+      isPaid: result.isPaid,
     });
   } catch (error) {
     console.error("❌ API error:", error);
