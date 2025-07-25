@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request, { params }: { params: { id: string; dateId: string } }) {
+// PUT – úprava termínu
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string; dateId: string } }
+) {
   const { date, capacity } = await request.json();
 
   if (!date || !capacity) {
@@ -21,5 +25,28 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Chyba při ukládání." }, { status: 500 });
+  }
+}
+
+// DELETE – smazání termínu
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string; dateId: string } }
+) {
+  const dateId = Number(params.dateId);
+
+  if (isNaN(dateId)) {
+    return NextResponse.json({ error: "Neplatné ID termínu." }, { status: 400 });
+  }
+
+  try {
+    await prisma.eventDate.delete({
+      where: { id: dateId },
+    });
+
+    return NextResponse.json({ message: "Termín byl úspěšně smazán." });
+  } catch (error) {
+    console.error("❌ Chyba při mazání termínu:", error);
+    return NextResponse.json({ error: "Chyba při mazání termínu." }, { status: 500 });
   }
 }

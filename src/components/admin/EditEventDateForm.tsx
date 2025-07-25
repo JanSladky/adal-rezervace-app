@@ -26,8 +26,11 @@ export default function EditEventDateForm({ eventId, dateId, initialDate, initia
     capacity: initialCapacity,
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const res = await fetch(`/api/admin/events/${eventId}/dates/${dateId}`, {
       method: "PUT",
@@ -37,6 +40,8 @@ export default function EditEventDateForm({ eventId, dateId, initialDate, initia
         capacity: Number(form.capacity),
       }),
     });
+
+    setLoading(false);
 
     if (res.ok) {
       router.push(`/admin/events/${eventId}/edit`);
@@ -59,8 +64,34 @@ export default function EditEventDateForm({ eventId, dateId, initialDate, initia
         onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
         required
       />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Uložit změny
+      <button
+        type="submit"
+        disabled={loading}
+        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-60"
+      >
+        {loading && (
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+            />
+          </svg>
+        )}
+        {loading ? "Ukládám…" : "Uložit změny"}
       </button>
     </form>
   );

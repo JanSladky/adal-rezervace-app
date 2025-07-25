@@ -8,7 +8,9 @@ import EditEventForm from "@/components/EditEventForm";
 import AddEventDateForm from "@/components/admin/AddEventDateForm";
 import DeleteEventDateButton from "@/components/admin/DeleteEventDateButton";
 import RegistrationActions from "@/components/admin/RegistrationActions";
-import { formatDifficulty } from "../../../../../utils/formatters"; // ⬅️ funkci načítáme zde
+import EditDateButton from "../../../../../components/EditDateButton";
+
+import { formatDifficulty } from "../../../../../utils/formatters";
 
 export default async function Page(context: { params: { id: string } }) {
   const { params } = context;
@@ -83,12 +85,7 @@ export default async function Page(context: { params: { id: string } }) {
                 </div>
                 <div className="flex gap-2">
                   <DeleteEventDateButton eventId={event.id} dateId={dateItem.id} />
-                  <a
-                    href={`/admin/events/${event.id}/dates/${dateItem.id}/edit`}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
-                  >
-                    Upravit termín
-                  </a>
+                  <EditDateButton eventId={event.id} dateId={dateItem.id} /> {/* ✅ nahrazeno */}
                 </div>
               </div>
 
