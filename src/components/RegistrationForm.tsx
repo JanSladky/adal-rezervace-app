@@ -14,7 +14,13 @@ interface RegistrationFormProps {
   alreadyRegistered: number;
 }
 
-export default function RegistrationForm({ eventId, selectedDateId, selectedDateISO, capacity, alreadyRegistered }: RegistrationFormProps) {
+export default function RegistrationForm({
+  eventId,
+  selectedDateId,
+  selectedDateISO,
+  capacity,
+  alreadyRegistered,
+}: RegistrationFormProps) {
   const router = useRouter();
   const remaining = capacity - alreadyRegistered;
 
@@ -102,15 +108,27 @@ export default function RegistrationForm({ eventId, selectedDateId, selectedDate
     router.push(`/event/${eventId}`);
   };
 
-  const hasModalData = submittedEmail && qrCodeUrl && typeof amountCZK === "number" && variableSymbol && accountNumber;
+  const hasModalData =
+    submittedEmail && qrCodeUrl && typeof amountCZK === "number" && variableSymbol && accountNumber;
 
   if (remaining <= 0) {
-    return <p className="text-red-600 font-semibold">Kapacita tohoto termínu je již vyčerpána, nelze se registrovat.</p>;
+    return (
+      <p className="text-red-600 font-semibold">
+        Kapacita tohoto termínu je již vyčerpána, nelze se registrovat.
+      </p>
+    );
   }
 
   return (
     <>
-      {toast && <ToastMessage message={toast.message} type={toast.type} duration={toast.duration} onClose={handleToastClose} />}
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={handleToastClose}
+        />
+      )}
 
       {showModal && hasModalData && (
         <ConfirmationModal
@@ -124,29 +142,60 @@ export default function RegistrationForm({ eventId, selectedDateId, selectedDate
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
-        <input type="text" placeholder="Vaše jméno" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        <input type="email" placeholder="Váš e-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-        <input
-          type="number"
-          min={1}
-          max={remaining}
-          value={form.attendees}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              attendees: parseInt(e.target.value),
-            })
-          }
-          required
-        />
-        <select value={selectedDateId} disabled className="bg-gray-100">
-          <option value={selectedDateId}>
-            {new Date(selectedDateISO).toLocaleString("cs-CZ", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </option>
-        </select>
+        <label className="flex flex-col">
+          <span className="mb-1 font-medium">Vaše jméno</span>
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+            className="p-2 border rounded"
+            placeholder="Např. Jan Novák"
+          />
+        </label>
+
+        <label className="flex flex-col">
+          <span className="mb-1 font-medium">Váš e-mail</span>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+            className="p-2 border rounded"
+            placeholder="např. jan@email.cz"
+          />
+        </label>
+
+        <label className="flex flex-col">
+          <span className="mb-1 font-medium">Počet vstupenek</span>
+          <input
+            type="number"
+            min={1}
+            max={remaining}
+            value={form.attendees}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                attendees: parseInt(e.target.value),
+              })
+            }
+            required
+            className="p-2 border rounded"
+            placeholder="Např. 2"
+          />
+        </label>
+
+        <label className="flex flex-col">
+          <span className="mb-1 font-medium">Vybraný termín</span>
+          <select value={selectedDateId} disabled className="bg-gray-100 p-2 border rounded">
+            <option value={selectedDateId}>
+              {new Date(selectedDateISO).toLocaleString("cs-CZ", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </option>
+          </select>
+        </label>
 
         <LoadingButton type="submit" isLoading={isSubmitting}>
           {isSubmitting ? "Odesílání..." : `Registrovat (${remaining} volných míst)`}
