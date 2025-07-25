@@ -22,7 +22,7 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
   const data = await getData(params.id);
 
   if (!data) {
-    return <div className="p-8 text-center text-red-500">Registrace nebyla nalezena.</div>;
+    return <div className="p-8 text-center text-red-500">Rezervace nebyla nalezena.</div>;
   }
 
   return (

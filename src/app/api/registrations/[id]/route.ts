@@ -29,7 +29,7 @@ export async function PATCH(request: Request, context: Context) {
     });
 
     if (!registration) {
-      return NextResponse.json({ error: "Registrace nebyla nalezena." }, { status: 404 });
+      return NextResponse.json({ error: "Rezervace nebyla nalezena." }, { status: 404 });
     }
 
     // Vygeneruj QR kód s odkazem na check-in stránku
@@ -70,7 +70,7 @@ export async function DELETE(request: Request, context: Context) {
     });
 
     if (!registration) {
-      return NextResponse.json({ error: "Registrace nebyla nalezena." }, { status: 404 });
+      return NextResponse.json({ error: "Rezervace nebyla nalezena." }, { status: 404 });
     }
 
     await prisma.registration.delete({ where: { id: regId } });
