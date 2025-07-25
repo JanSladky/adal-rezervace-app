@@ -1,7 +1,6 @@
-import { prisma } from "@/lib/prisma";
+// src/app/api/test/route.ts
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const events = await prisma.event.findMany();
-  return NextResponse.json(events);
+  return NextResponse.json({ message: "Funguje to ✅" });
 }

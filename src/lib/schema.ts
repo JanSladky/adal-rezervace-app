@@ -1,11 +1,12 @@
-import { integer, pgTable, text } from "drizzle-orm/pg-core";
+// src/lib/schema.ts
+import { boolean, integer, pgTable, text } from "drizzle-orm/pg-core";
 
-export const registrations = pgTable("registrations", {
+export const registrations = pgTable("Registration", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
-  email: text("email"),
-  eventName: text("event_name").notNull(),
-  eventDate: text("event_date").notNull(),
-  eventLocation: text("event_location").notNull(),
-  isPaid: integer("is_paid").default(0),
+  email: text("email").notNull(),
+  eventId: integer("eventId").notNull(),
+  eventDateId: integer("eventDateId").notNull(),
+  attendees: integer("attendees").default(1),
+  paid: boolean("paid").notNull(),
 });
