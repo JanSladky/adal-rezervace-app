@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache"; // ZMĚNA ZDE: Přidán import
 
 type Context = {
   params: { id: string };
@@ -59,6 +60,8 @@ export async function PUT(request: Request, context: Context) {
       data: { name, location, description, difficulty, image, duration },
     });
 
+    revalidatePath("/"); // ZMĚNA ZDE: Přidána revalidace po úpravě
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("❌ Chyba při aktualizaci akce:", error);
@@ -80,6 +83,8 @@ export async function DELETE(_request: Request, context: Context) {
       prisma.eventDate.deleteMany({ where: { eventId: id } }),
       prisma.event.delete({ where: { id } }),
     ]);
+
+    revalidatePath("/"); // ZMĚNA ZDE: Přidána revalidace po smazání
 
     return NextResponse.json({ message: "Akce a všechny návaznosti byly smazány." });
   } catch (error) {
