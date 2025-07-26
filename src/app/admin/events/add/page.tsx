@@ -13,6 +13,7 @@ export default function AddEventPage() {
     amountCZK: "100",
     variableSymbol: "",
     accountNumber: "12345678/0100",
+    duration: "",
   });
   const [file, setFile] = useState<File | null>(null);
 
@@ -34,7 +35,7 @@ export default function AddEventPage() {
 
     const uploadData = await uploadRes.json();
 
-    if (!uploadData.url) {
+    if (!uploadData.secure_url) {
       alert("Chyba při nahrávání obrázku");
       return;
     }
@@ -50,7 +51,8 @@ export default function AddEventPage() {
         amountCZK: Number(form.amountCZK),
         variableSymbol: form.variableSymbol,
         accountNumber: form.accountNumber,
-        image: uploadData.url,
+        image: uploadData.secure_url,
+        duration: form.duration
       }),
     });
 
@@ -70,6 +72,13 @@ export default function AddEventPage() {
         <option value="stredne_narocne">Středně náročné</option>
         <option value="narocne">Náročné</option>
       </select>
+      <input
+        type="text"
+        placeholder="Časová náročnost (např. 3 hodiny)"
+        value={form.duration}
+        onChange={(e) => setForm({ ...form, duration: e.target.value })}
+        required
+      />
       <textarea placeholder="Popis" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
 
       <input
