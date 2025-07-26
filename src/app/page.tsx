@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
+export const revalidate = 0;
+
 export default async function HomePage() {
   const events = await prisma.event.findMany({
     select: {
