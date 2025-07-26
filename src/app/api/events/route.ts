@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 // POST = vytvoření nové akce
 export async function POST(request: Request) {
@@ -20,9 +21,11 @@ export async function POST(request: Request) {
         amountCZK: Number(amountCZK),
         variableSymbol,
         accountNumber,
-        duration
+        duration,
       },
     });
+
+    revalidatePath("/");
 
     return NextResponse.json(event);
   } catch (error) {
