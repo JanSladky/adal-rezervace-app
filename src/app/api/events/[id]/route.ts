@@ -40,7 +40,7 @@ export async function PUT(request: Request, context: Context) {
   }
 
   const body = await request.json();
-  const { name, location, description, difficulty, image, duration } = body;
+  const { name, location, description, difficulty, image, duration, variableSymbol, accountNumber } = body;
 
   if (
     !name ||
@@ -49,7 +49,9 @@ export async function PUT(request: Request, context: Context) {
     !difficulty ||
     !image ||
     typeof duration !== "string" ||
-    duration.trim() === ""
+    duration.trim() === "" ||
+    !variableSymbol ||
+    !accountNumber
   ) {
     return NextResponse.json({ error: "Chybí nebo jsou neplatná pole." }, { status: 400 });
   }
@@ -57,7 +59,7 @@ export async function PUT(request: Request, context: Context) {
   try {
     const updated = await prisma.event.update({
       where: { id },
-      data: { name, location, description, difficulty, image, duration },
+      data: { name, location, description, difficulty, image, duration, variableSymbol, accountNumber },
     });
 
     revalidatePath("/"); // ZMĚNA ZDE: Přidána revalidace po úpravě

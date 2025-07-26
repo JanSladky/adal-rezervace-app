@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DeleteButton from "../../../components/DeleteButton";
@@ -20,12 +19,24 @@ export default function AdminEventsPageClient({ events }: { events: EventWithDat
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Seznam akcí (admin)</h1>
 
-      <Link
-        href="/admin/events/add"
-        className="inline-block mb-4 bg-green-600 text-white px-4 py-2 rounded"
+      {/* ZMĚNA ZDE: Původní <Link> je nahrazen za <button> s logikou pro spinner */}
+      <button
+        onClick={() => {
+          // Nastavíme speciální ID (0), abychom odlišili toto tlačítko od ostatních
+          setLoadingId(0); 
+          startTransition(() => {
+            router.push("/admin/events/add");
+          });
+        }}
+        disabled={isPending}
+        className="inline-flex items-center justify-center mb-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50 gap-2"
       >
+        {/* Zobrazíme spinner, jen když probíhá navigace z tohoto tlačítka */}
+        {isPending && loadingId === 0 && (
+          <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+        )}
         Přidat novou akci
-      </Link>
+      </button>
 
       <ul className="flex flex-col gap-4">
         {events.map((event) => (
@@ -52,7 +63,7 @@ export default function AdminEventsPageClient({ events }: { events: EventWithDat
                     router.push(`/admin/events/${event.id}/edit`);
                   });
                 }}
-                disabled={isPending && loadingId === event.id}
+                disabled={isPending} // Deaktivujeme, pokud jakákoliv navigace probíhá
                 className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-2 disabled:opacity-50"
               >
                 {isPending && loadingId === event.id ? (

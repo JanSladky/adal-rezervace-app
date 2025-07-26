@@ -33,6 +33,8 @@ export default async function Page(context: { params: { id: string } }) {
       description: true,
       difficulty: true,
       duration: true,
+      variableSymbol: true,
+      accountNumber: true,
       eventDates: {
         include: { registrations: true },
       },
@@ -51,6 +53,8 @@ export default async function Page(context: { params: { id: string } }) {
     description: event.description,
     difficulty: event.difficulty as "nenarocne" | "stredne_narocne" | "narocne",
     duration: event.duration,
+    variableSymbol: event.variableSymbol,
+    accountNumber: event.accountNumber, 
   } as const;
 
   return (
@@ -60,10 +64,7 @@ export default async function Page(context: { params: { id: string } }) {
       <h2 className="text-xl font-bold mt-8 mb-4">Termíny akce</h2>
       <ul className="flex flex-col gap-6 mb-4">
         {event.eventDates.map((dateItem: DateItem) => {
-          const totalRegistered = dateItem.registrations.reduce(
-            (sum: number, r: Reg) => sum + (r.attendees ?? 1),
-            0
-          );
+          const totalRegistered = dateItem.registrations.reduce((sum: number, r: Reg) => sum + (r.attendees ?? 1), 0);
           const remaining = dateItem.capacity - totalRegistered;
           const unpaid = dateItem.registrations.filter((r: Reg) => !r.paid);
           const paid = dateItem.registrations.filter((r: Reg) => r.paid);
@@ -122,8 +123,7 @@ export default async function Page(context: { params: { id: string } }) {
                     {paid.map((r: Reg) => (
                       <li key={r.id} className="flex justify-between items-center">
                         <span>
-                          {r.name} ({r.email}) – {r.attendees ?? 1} osob{" "}
-                          <strong className="ml-2 text-green-600">(✅ zaplaceno)</strong>
+                          {r.name} ({r.email}) – {r.attendees ?? 1} osob <strong className="ml-2 text-green-600">(✅ zaplaceno)</strong>
                         </span>
                         <RegistrationActions
                           registration={{
